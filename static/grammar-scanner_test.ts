@@ -40,7 +40,7 @@ const testAll = (content: any) => {
 export const toString = (
   location: Location,
 ): string =>
-  location.tag == "Coordinate"
+  location.tag === "Coordinate"
     ? `${location.offset}:${location.line}:${location.column}`
     : `${location.start.offset}:${location.start.line}:${location.start.column}-${location.end.offset}:${location.end.line}:${location.end.column}`;
 

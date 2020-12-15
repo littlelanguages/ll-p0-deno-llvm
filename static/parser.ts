@@ -1,5 +1,5 @@
 import { Either } from "../deps/either.ts";
-import { combine } from "../deps/location.ts";
+import { combine, Location } from "../deps/location.ts";
 import {
   BinaryOp,
   Expression,
@@ -41,7 +41,7 @@ type T_AdditiveOp = BinaryOp;
 type T_MultiplicativeExpression = Expression;
 type T_MultiplicativeOp = BinaryOp;
 type T_Factor = Expression;
-type T_UnaryOp = UnaryOp;
+type T_UnaryOp = [Location, UnaryOp];
 
 const visitor: Visitor<
   T_Program,
@@ -105,6 +105,7 @@ const visitor: Visitor<
 
     return a1 === undefined ? v : {
       tag: "LiteralExpressionUnaryValue",
+      location: a1[1],
       op: a1[0] === TToken.Plus ? UnaryOp.UnaryPlus : UnaryOp.UnaryMinus,
       value: v,
     };
@@ -152,9 +153,9 @@ const visitor: Visitor<
     a3: Token,
   ): T_FunctionDeclarationSuffix => [a2, undefined],
 
-  visitType1: (a: Token): T_Type => Type.TInt,
-  visitType2: (a: Token): T_Type => Type.TFloat,
-  visitType3: (a: Token): T_Type => Type.TBool,
+  visitType1: (a: Token): T_Type => Type.Int,
+  visitType2: (a: Token): T_Type => Type.Float,
+  visitType3: (a: Token): T_Type => Type.Bool,
 
   visitTypedIdentifier: (
     a1: Token,
@@ -338,7 +339,8 @@ const visitor: Visitor<
   }),
   visitFactor6: (a1: T_UnaryOp, a2: T_Factor): T_Factor => ({
     tag: "UnaryExpression",
-    op: a1,
+    location: a1[0],
+    op: a1[1],
     expression: a2,
   }),
   visitFactor7: (a1: Token, a2: T_Expression, a3: Token): T_Factor => ({
@@ -361,9 +363,9 @@ const visitor: Visitor<
           ? []
           : [a2[1][0], ...a2[1][1].map((a) => a[1])],
       },
-  visitUnaryOp1: (a: Token): T_UnaryOp => UnaryOp.UnaryNot,
-  visitUnaryOp2: (a: Token): T_UnaryOp => UnaryOp.UnaryMinus,
-  visitUnaryOp3: (a: Token): T_UnaryOp => UnaryOp.UnaryPlus,
+  visitUnaryOp1: (a: Token): T_UnaryOp => [a[1], UnaryOp.UnaryNot],
+  visitUnaryOp2: (a: Token): T_UnaryOp => [a[1], UnaryOp.UnaryMinus],
+  visitUnaryOp3: (a: Token): T_UnaryOp => [a[1], UnaryOp.UnaryPlus],
 };
 
 const mkIdentifier = (token: Token): Identifier => ({

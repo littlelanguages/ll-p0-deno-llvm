@@ -28,9 +28,9 @@ export enum VariableAccess {
 }
 
 export enum Type {
-  TInt,
-  TFloat,
-  TBool,
+  Int,
+  Float,
+  Bool,
 }
 
 export type Statement =
@@ -108,6 +108,7 @@ export type BinaryExpression = {
 
 export type UnaryExpression = {
   tag: "UnaryExpression";
+  location: Location;
   op: UnaryOp;
   expression: Expression;
 };
@@ -135,6 +136,7 @@ export type LiteralExpression =
 
 export type LiteralExpressionUnaryValue = {
   tag: "LiteralExpressionUnaryValue";
+  location: Location;
   op: UnaryOp;
   value: LiteralValue;
 };

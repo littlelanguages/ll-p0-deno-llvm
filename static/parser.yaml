@@ -16,11 +16,9 @@
                   value: println
                   position: 15:2:3-21:2:9
                 parameters:
-                  - LiteralValue:
-                      value:
-                        LiteralString:
-                          value: '"Hello world"'
-                          position: 23:2:11-35:2:23
+                  - LiteralString:
+                      value: '"Hello world"'
+                      position: 23:2:11-35:2:23
 - scenario:
     name: Expressions
     tests:
@@ -42,11 +40,9 @@
                       result: Bool
                       s: []
                       e:
-                        LiteralValue:
-                          value:
-                            LiteralBool:
-                              value: 'True'
-                              position: 28:2:10-31:2:13
+                        LiteralBool:
+                          value: 'True'
+                          position: 28:2:10-31:2:13
             - name: "false"
               input: |
                 fun test(): Bool {
@@ -62,11 +58,9 @@
                       result: Bool
                       s: []
                       e:
-                        LiteralValue:
-                          value:
-                            LiteralBool:
-                              value: 'False'
-                              position: 28:2:10-32:2:14
+                        LiteralBool:
+                          value: 'False'
+                          position: 28:2:10-32:2:14
       - name: LiteralFloat
         input: |
           fun test(): Float {
@@ -82,11 +76,9 @@
                 result: Float
                 s: []
                 e:
-                  LiteralValue:
-                    value:
-                      LiteralFloat:
-                        value: '1.23'
-                        position: 29:2:10-32:2:13
+                  LiteralFloat:
+                    value: '1.23'
+                    position: 29:2:10-32:2:13
       - name: LiteralInt
         input: |
           fun test(): Int {
@@ -102,11 +94,9 @@
                 result: Int
                 s: []
                 e:
-                  LiteralValue:
-                    value:
-                      LiteralInt:
-                        value: '1234'
-                        position: 27:2:10-30:2:13
+                  LiteralInt:
+                    value: '1234'
+                    position: 27:2:10-30:2:13
       - name: LiteralString
         input: |
           fun test() {
@@ -125,11 +115,9 @@
                         value: println
                         position: 15:2:3-21:2:9
                       parameters:
-                        - LiteralValue:
-                            value:
-                              LiteralString:
-                                value: '"hello"'
-                                position: 23:2:11-29:2:17
+                        - LiteralString:
+                            value: '"hello"'
+                            position: 23:2:11-29:2:17
       - name: Parenthesis
         input: |
           fun test(): Int {
@@ -147,11 +135,9 @@
                 e:
                   Parenthesis:
                     e:
-                      LiteralValue:
-                        value:
-                          LiteralInt:
-                            value: '12'
-                            position: 28:2:11-29:2:12
+                      LiteralInt:
+                        value: '12'
+                        position: 28:2:11-29:2:12
                     position: 27:2:10-30:2:13
       - name: Ternary expression
         input: |
@@ -174,17 +160,13 @@
                         value: b
                         position: '27:2:10'
                     e2:
-                      LiteralValue:
-                        value:
-                          LiteralInt:
-                            value: '1'
-                            position: '31:2:14'
+                      LiteralInt:
+                        value: '1'
+                        position: '31:2:14'
                     e3:
-                      LiteralValue:
-                        value:
-                          LiteralInt:
-                            value: '0'
-                            position: '35:2:18'
+                      LiteralInt:
+                        value: '0'
+                        position: '35:2:18'
       - scenario:
           name: Binary Expression
           tests:
@@ -1157,21 +1139,15 @@
                             value: random
                             position: 29:2:10-34:2:15
                           parameters:
-                            - LiteralValue:
-                                value:
-                                  LiteralInt:
-                                    value: '1'
-                                    position: '36:2:17'
-                            - LiteralValue:
-                                value:
-                                  LiteralInt:
-                                    value: '2'
-                                    position: '39:2:20'
-                            - LiteralValue:
-                                value:
-                                  LiteralInt:
-                                    value: '3'
-                                    position: '42:2:23'
+                            - LiteralInt:
+                                value: '1'
+                                position: '36:2:17'
+                            - LiteralInt:
+                                value: '2'
+                                position: '39:2:20'
+                            - LiteralInt:
+                                value: '3'
+                                position: '42:2:23'
 - scenario:
     name: Declarations
     tests:
@@ -1186,11 +1162,9 @@
                   value: x
                   position: '6:1:7'
                 e:
-                  LiteralExpressionValue:
-                    value:
-                      LiteralBool:
-                        value: 'True'
-                        position: 10:1:11-13:1:14
+                  LiteralBool:
+                    value: 'True'
+                    position: 10:1:11-13:1:14
       - name: Let
         input: |
           let x = true;
@@ -1202,11 +1176,9 @@
                   value: x
                   position: '4:1:5'
                 e:
-                  LiteralExpressionValue:
-                    value:
-                      LiteralBool:
-                        value: 'True'
-                        position: 8:1:9-11:1:12
+                  LiteralBool:
+                    value: 'True'
+                    position: 8:1:9-11:1:12
       - scenario:
           name: Declaration Expressions
           tests:
@@ -1221,11 +1193,9 @@
                         value: x
                         position: '6:1:7'
                       e:
-                        LiteralExpressionValue:
-                          value:
-                            LiteralInt:
-                              value: '1234'
-                              position: 10:1:11-13:1:14
+                        LiteralInt:
+                          value: '1234'
+                          position: 10:1:11-13:1:14
             - name: Constant Float
               input: |
                 const x = 1.23;
@@ -1237,11 +1207,9 @@
                         value: x
                         position: '6:1:7'
                       e:
-                        LiteralExpressionValue:
-                          value:
-                            LiteralFloat:
-                              value: '1.23'
-                              position: 10:1:11-13:1:14
+                        LiteralFloat:
+                          value: '1.23'
+                          position: 10:1:11-13:1:14
             - name: Constant +constant
               input: |
                 const x = +123;
@@ -1289,11 +1257,9 @@
                         value: x
                         position: '6:1:7'
                       e:
-                        LiteralExpressionValue:
-                          value:
-                            LiteralBool:
-                              value: 'True'
-                              position: 10:1:11-13:1:14
+                        LiteralBool:
+                          value: 'True'
+                          position: 10:1:11-13:1:14
       - name: Function without return type
         input: |
           fun add(a: Int, b: Int) {
@@ -1384,11 +1350,9 @@
                         value: x
                         position: "15:2:3"
                       e:
-                        LiteralValue:
-                          value:
-                            LiteralInt:
-                              value: '10'
-                              position: 19:2:7-20:2:8
+                        LiteralInt:
+                          value: '10'
+                          position: 19:2:7-20:2:8
       - name: Variable declaration
         input: |
           fun main() {
@@ -1408,11 +1372,9 @@
                         value: x
                         position: "19:2:7"
                       e:
-                        LiteralValue:
-                          value:
-                            LiteralInt:
-                              value: '10'
-                              position: 23:2:11-24:2:12
+                        LiteralInt:
+                          value: '10'
+                          position: 23:2:11-24:2:12
       - name: Constant declaration
         input: |
           fun main() {
@@ -1432,11 +1394,9 @@
                         value: x
                         position: "21:2:9"
                       e:
-                        LiteralValue:
-                          value:
-                            LiteralInt:
-                              value: '10'
-                              position: 25:2:13-26:2:14
+                        LiteralInt:
+                          value: '10'
+                          position: 25:2:13-26:2:14
       - scenario:
           name: If statement
           tests:
@@ -1632,21 +1592,17 @@
                                       value: b
                                       position: "29:3:5"
                                     e:
-                                      LiteralValue:
-                                        value:
-                                          LiteralInt:
-                                            value: '10'
-                                            position: 33:3:9-34:3:10
+                                      LiteralInt:
+                                        value: '10'
+                                        position: 33:3:9-34:3:10
                                 - AssignmentStatement:
                                     identifier:
                                       value: c
                                       position: "41:4:5"
                                     e:
-                                      LiteralValue:
-                                        value:
-                                          LiteralInt:
-                                            value: '1'
-                                            position: "45:4:9"
+                                      LiteralInt:
+                                        value: '1'
+                                        position: "45:4:9"
       - scenario:
           name: Call statement
           tests:
@@ -1686,11 +1642,9 @@
                               value: println
                               position: 15:2:3-21:2:9
                             parameters:
-                              - LiteralValue:
-                                  value:
-                                    LiteralString:
-                                      value: '"Hello World: "'
-                                      position: 23:2:11-37:2:25
+                              - LiteralString:
+                                  value: '"Hello World: "'
+                                  position: 23:2:11-37:2:25
                               - IdentifierReference:
                                   value: a
                                   position: "40:2:28"
