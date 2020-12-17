@@ -1,7 +1,7 @@
 export type Program = {
   tag: "Program";
-  declarations: Array<Declaration>;
-  statement: Statement;
+  d: Array<Declaration>;
+  s: Statement;
 };
 
 export type Declaration =
@@ -11,22 +11,28 @@ export type Declaration =
 
 export type ConstantDeclaration = {
   tag: "ConstantDeclaration";
-  n: string;
-  v: LiteralValue;
+  identifier: string;
+  e: LiteralValue;
 };
 
 export type VariableDeclaration = {
   tag: "VariableDeclaration";
-  n: string;
-  v: LiteralValue;
+  identifier: string;
+  e: LiteralValue;
 };
 
 export type FunctionDeclaration = {
-  tag: "VariableDeclaration";
+  tag: "FunctionDeclaration";
   n: string;
-  ps: Array<[string, Type]>;
+  ps: Array<Parameter>;
   ss: Array<Statement>;
   e: Expression | undefined;
+};
+
+export type Parameter = {
+  tag: "Parameter";
+  n: string;
+  t: Type;
 };
 
 export enum Type {
@@ -50,19 +56,19 @@ export type Statement =
 export type AssignmentStatement = {
   tag: "AssignmentStatement";
   n: string;
-  v: Expression;
+  e: Expression;
 };
 
 export type ConstantDeclarationStatement = {
   tag: "ConstantDeclarationStatement";
   n: string;
-  v: Expression;
+  e: Expression;
 };
 
 export type VariableDeclarationStatement = {
   tag: "VariableDeclarationStatement";
   n: string;
-  v: Expression;
+  e: Expression;
 };
 
 export type IfThenElseStatement = {

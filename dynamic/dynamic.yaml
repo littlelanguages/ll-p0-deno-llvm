@@ -59,9 +59,9 @@
               input: |
                 const x = 2147483648;
               output:
-                - LiteralIntOverflow:
+                - LiteralIntOverflowError:
                     text: '2147483648'
-                    position: 10:1:11-19:1:20
+                    location: 10:1:11-19:1:20
             - name: "negative int in range: -123"
               input: |
                 const x = -123;
@@ -90,9 +90,9 @@
               input: |
                 const x = -2147483649;
               output:
-                - LiteralIntOverflow:
+                - LiteralIntOverflowError:
+                    location: 10:1:11-20:1:21
                     text: '-2147483649'
-                    position: 10:1:11-20:1:21
       - scenario:
           name: Literal Float
           tests:
@@ -261,7 +261,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '1.2e-2'
+                          LiteralFloat: '0.012'
                   s:
                     EmptyStatement: {}
             - name: "positive float in range with negative E: 1.2e-2"
@@ -273,7 +273,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '1.2e-2'
+                          LiteralFloat: '0.012'
                   s:
                     EmptyStatement: {}
             - name: "positive float in range starting with . and negative E: .2E-2"
@@ -285,7 +285,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '2.0e-3'
+                          LiteralFloat: '0.002'
                   s:
                     EmptyStatement: {}
             - name: "positive float in range starting with . and negative E: .2e-2"
@@ -297,7 +297,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '2.0e-3'
+                          LiteralFloat: '0.002'
                   s:
                     EmptyStatement: {}
             - name: "positive float in range without . and negative E: 2E-2"
@@ -309,7 +309,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '2.0e-2'
+                          LiteralFloat: '0.02'
                   s:
                     EmptyStatement: {}
             - name: "positive float in range without . and negative e: 2e-2"
@@ -321,16 +321,16 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '2.0e-2'
+                          LiteralFloat: '0.02'
                   s:
                     EmptyStatement: {}
             - name: "positive float outside range: 1.0e100"
               input: |
                 const x = 1.0e100;
               output:
-                - LiteralFloatOverflow:
+                - LiteralFloatOverflowError:
                     text: '1.0e100'
-                    position: 10:1:11-16:1:17
+                    location: 10:1:11-16:1:17
             - name: "negative float in range: -1.2"
               input: |
                 const x = -1.2;
@@ -496,7 +496,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '-1.2e-2'
+                          LiteralFloat: '-0.012'
                   s:
                     EmptyStatement: {}
             - name: "negative float in range with negative E: -1.2e-2"
@@ -508,7 +508,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '-1.2e-2'
+                          LiteralFloat: '-0.012'
                   s:
                     EmptyStatement: {}
             - name: "negative float in range starting with . and negative E: -.2E-2"
@@ -520,7 +520,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '-2.0e-3'
+                          LiteralFloat: '-0.002'
                   s:
                     EmptyStatement: {}
             - name: "negative float in range starting with . and negative E: -.2e-2"
@@ -532,7 +532,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '-2.0e-3'
+                          LiteralFloat: '-0.002'
                   s:
                     EmptyStatement: {}
             - name: "negative float in range without . and negative E: -2E-2"
@@ -544,7 +544,7 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat: '-2.0e-2'
+                          LiteralFloat: '-0.02'
                   s:
                     EmptyStatement: {}
             - name: "negative float in range without . and negative e: -2e-2"
@@ -556,16 +556,16 @@
                     - ConstantDeclaration:
                         identifier: x
                         e:
-                          LiteralFloat:  '-2.0e-2'
+                          LiteralFloat:  '-0.02'
                   s:
                     EmptyStatement: {}
             - name: "negative float outside range: -1.0e100"
               input: |
                 const x = -1.0e100;
               output:
-                - LiteralFloatOverflow:
+                - LiteralFloatOverflowError:
                     text: '-1.0e100'
-                    position: 10:1:11-17:1:18
+                    location: 10:1:11-17:1:18
       - scenario:
           name: Ternary
           tests:
@@ -579,37 +579,34 @@
                   d: []
                   s:
                     ConstantDeclarationStatement:
-                      identifier: x
+                      n: x
                       e:
                         TernaryExpression:
-                          type: Int
+                          t: Int
                           e1:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                           e2:
-                            LiteralValue:
-                              LiteralInt: '1'
+                            LiteralInt: '1'
                           e3:
-                            LiteralValue:
-                              LiteralInt: '2'
+                            LiteralInt: '2'
             - name: "Ternary Expression Not Boolean: 1.0 ? 1 : 2"
               input: |
                 fun main() {
                   const x = 1.0 ? 1 : 2;
                 }
               output:
-                - TernaryExpressionNotBoolean:
-                    boolPosition: 25:2:13-27:2:15
-                    position: 25:2:13-35:2:23
+                - TernaryExpressionNotBooleanError:
+                    boollocation: 25:2:13-27:2:15
+                    location: 25:2:13-35:2:23
             - name: "Ternary Expression Results Incompatible: true ? 1 : 2.0"
               input: |
                 fun main() {
                   const x = true ? 1 : 2.0;
                 }
               output:
-                - TernaryExpressionResultIncompatible:
-                    thenPosition: "32:2:20"
-                    elsePosition: 36:2:24-38:2:26
+                - TernaryExpressionResultIncompatibleError:
+                    thenlocation: "32:2:20"
+                    elselocation: 36:2:24-38:2:26
       - scenario:
           name: Binary
           tests:
@@ -629,51 +626,49 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: And
                                       e1:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                                       e2:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                         - name: "1 && true"
                           input: |
                             fun main() {
                               const x = 1 && true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: And
                                 type: Int
-                                position: "25:2:13"
+                                location: "25:2:13"
                         - name: "true && 1"
                           input: |
                             fun main() {
                               const x = true && 1;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: And
                                 type: Int
-                                position: "33:2:21"
+                                location: "33:2:21"
                         - name: "1.0 && 1"
                           input: |
                             fun main() {
                               const x = 1.0 && 1;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: And
                                 type: Float
-                                position: 25:2:13-27:2:15
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-27:2:15
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: And
                                 type: Int
-                                position: "32:2:20"
+                                location: "32:2:20"
                   - scenario:
                       name: "||"
                       tests:
@@ -687,51 +682,49 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: Or
                                       e1:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                                       e2:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                         - name: "1 || true"
                           input: |
                             fun main() {
                               const x = 1 || true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Or
                                 type: Int
-                                position: "25:2:13"
+                                location: "25:2:13"
                         - name: "true || 1"
                           input: |
                             fun main() {
                               const x = true || 1;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Or
                                 type: Int
-                                position: "33:2:21"
+                                location: "33:2:21"
                         - name: "1.0 || 1"
                           input: |
                             fun main() {
                               const x = 1.0 || 1;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Or
                                 type: Float
-                                position: 25:2:13-27:2:15
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-27:2:15
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Or
                                 type: Int
-                                position: "32:2:20"
+                                location: "32:2:20"
             - scenario:
                 name: Equality operators
                 tests:
@@ -748,17 +741,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: Equal
                                       e1:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                                       e2:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                         - name: "3 == 1"
                           input: |
                             fun main() {
@@ -769,17 +760,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: Equal
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 == 43.2"
                           input: |
                             fun main() {
@@ -790,28 +779,26 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: Equal
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 == true"
                           input: |
                             fun main() {
                               const x = 1 == true;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Equal
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 30:2:18-33:2:21
+                                location2: 30:2:18-33:2:21
                                 type2: Bool
                         - name: "true == 1"
                           input: |
@@ -819,11 +806,11 @@
                               const x = true == 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Equal
-                                position1: 25:2:13-28:2:16
+                                location1: 25:2:13-28:2:16
                                 type1: Bool
-                                position2: "33:2:21"
+                                location2: "33:2:21"
                                 type2: Int
                   - scenario:
                       name: "!="
@@ -838,17 +825,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: NotEqual
                                       e1:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                                       e2:
-                                        LiteralValue:
-                                          LiteralBool: 'True'
+                                        LiteralBool: 'True'
                         - name: "3 != 1"
                           input: |
                             fun main() {
@@ -859,17 +844,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: NotEqual
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 != 43.2"
                           input: |
                             fun main() {
@@ -880,28 +863,26 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: NotEqual
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 != true"
                           input: |
                             fun main() {
                               const x = 1 != true;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: NotEqual
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 30:2:18-33:2:21
+                                location2: 30:2:18-33:2:21
                                 type2: Bool
                         - name: "true != 1"
                           input: |
@@ -909,11 +890,11 @@
                               const x = true != 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: NotEqual
-                                position1: 25:2:13-28:2:16
+                                location1: 25:2:13-28:2:16
                                 type1: Bool
-                                position2: "33:2:21"
+                                location2: "33:2:21"
                                 type2: Int
             - scenario:
                 name: Relational operators
@@ -927,14 +908,14 @@
                               const x = true < true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: LessThan
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: LessThan
                                 type: Bool
-                                position: 32:2:20-35:2:23
+                                location: 32:2:20-35:2:23
                         - name: "3 < 1"
                           input: |
                             fun main() {
@@ -945,17 +926,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: LessThan
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 < 43.2"
                           input: |
                             fun main() {
@@ -966,32 +945,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: LessThan
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 < true"
                           input: |
                             fun main() {
                               const x = 1 < true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: LessThan
                                 type: Bool
-                                position: 29:2:17-32:2:20
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 29:2:17-32:2:20
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: LessThan
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 29:2:17-32:2:20
+                                location2: 29:2:17-32:2:20
                                 type2: Bool
                         - name: "true < 1"
                           input: |
@@ -999,11 +976,11 @@
                               const x = 1.0 < 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: LessThan
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "31:2:19"
+                                location2: "31:2:19"
                                 type2: Int
                   - scenario:
                       name: "<="
@@ -1014,14 +991,14 @@
                               const x = true <= true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: LessEqual
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: LessEqual
                                 type: Bool
-                                position: 33:2:21-36:2:24
+                                location: 33:2:21-36:2:24
                         - name: "3 <= 1"
                           input: |
                             fun main() {
@@ -1032,17 +1009,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: LessEqual
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 <= 43.2"
                           input: |
                             fun main() {
@@ -1053,32 +1028,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: LessEqual
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 <= true"
                           input: |
                             fun main() {
                               const x = 1 <= true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: LessEqual
                                 type: Bool
-                                position: 30:2:18-33:2:21
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 30:2:18-33:2:21
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: LessEqual
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 30:2:18-33:2:21
+                                location2: 30:2:18-33:2:21
                                 type2: Bool
                         - name: "true <= 1"
                           input: |
@@ -1086,11 +1059,11 @@
                               const x = 1.0 <= 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: LessEqual
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "32:2:20"
+                                location2: "32:2:20"
                                 type2: Int
                   - scenario:
                       name: ">"
@@ -1101,14 +1074,14 @@
                               const x = true > true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: GreaterThan
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: GreaterThan
                                 type: Bool
-                                position: 32:2:20-35:2:23
+                                location: 32:2:20-35:2:23
                         - name: "3 > 1"
                           input: |
                             fun main() {
@@ -1119,17 +1092,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: GreaterThan
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 > 43.2"
                           input: |
                             fun main() {
@@ -1140,32 +1111,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: GreaterThan
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 > true"
                           input: |
                             fun main() {
                               const x = 1 > true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: GreaterThan
                                 type: Bool
-                                position: 29:2:17-32:2:20
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 29:2:17-32:2:20
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: GreaterThan
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 29:2:17-32:2:20
+                                location2: 29:2:17-32:2:20
                                 type2: Bool
                         - name: "1.0 > 1"
                           input: |
@@ -1173,11 +1142,11 @@
                               const x = 1.0 > 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: GreaterThan
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "31:2:19"
+                                location2: "31:2:19"
                                 type2: Int
                   - scenario:
                       name: ">="
@@ -1188,14 +1157,14 @@
                               const x = true >= true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: GreaterEqual
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: GreaterEqual
                                 type: Bool
-                                position: 33:2:21-36:2:24
+                                location: 33:2:21-36:2:24
                         - name: "3 >= 1"
                           input: |
                             fun main() {
@@ -1206,17 +1175,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: GreaterEqual
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 >= 43.2"
                           input: |
                             fun main() {
@@ -1227,32 +1194,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Bool
+                                      t: Bool
                                       op: GreaterEqual
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 >= true"
                           input: |
                             fun main() {
                               const x = 1 >= true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: GreaterEqual
                                 type: Bool
-                                position: 30:2:18-33:2:21
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 30:2:18-33:2:21
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: GreaterEqual
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 30:2:18-33:2:21
+                                location2: 30:2:18-33:2:21
                                 type2: Bool
                         - name: "1.0 >= 1"
                           input: |
@@ -1260,11 +1225,11 @@
                               const x = 1.0 >= 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: GreaterEqual
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "32:2:20"
+                                location2: "32:2:20"
                                 type2: Int
             - scenario:
                 name: Arithmatic operators
@@ -1278,14 +1243,14 @@
                               const x = true + true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Plus
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Plus
                                 type: Bool
-                                position: 32:2:20-35:2:23
+                                location: 32:2:20-35:2:23
                         - name: "3 + 1"
                           input: |
                             fun main() {
@@ -1296,17 +1261,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Int
+                                      t: Int
                                       op: Plus
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 + 43.2"
                           input: |
                             fun main() {
@@ -1317,32 +1280,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Float
+                                      t: Float
                                       op: Plus
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 + true"
                           input: |
                             fun main() {
                               const x = 1 + true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Plus
                                 type: Bool
-                                position: 29:2:17-32:2:20
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 29:2:17-32:2:20
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Plus
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 29:2:17-32:2:20
+                                location2: 29:2:17-32:2:20
                                 type2: Bool
                         - name: "1.0 + 1"
                           input: |
@@ -1350,11 +1311,11 @@
                               const x = 1.0 + 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Plus
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "31:2:19"
+                                location2: "31:2:19"
                                 type2: Int
                   - scenario:
                       name: "-"
@@ -1365,14 +1326,14 @@
                               const x = true - true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Minus
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Minus
                                 type: Bool
-                                position: 32:2:20-35:2:23
+                                location: 32:2:20-35:2:23
                         - name: "3 - 1"
                           input: |
                             fun main() {
@@ -1383,17 +1344,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Int
+                                      t: Int
                                       op: Minus
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 - 43.2"
                           input: |
                             fun main() {
@@ -1404,32 +1363,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Float
+                                      t: Float
                                       op: Minus
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 - true"
                           input: |
                             fun main() {
                               const x = 1 - true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Minus
                                 type: Bool
-                                position: 29:2:17-32:2:20
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 29:2:17-32:2:20
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Minus
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 29:2:17-32:2:20
+                                location2: 29:2:17-32:2:20
                                 type2: Bool
                         - name: "1.0 - 1"
                           input: |
@@ -1437,11 +1394,11 @@
                               const x = 1.0 - 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Minus
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "31:2:19"
+                                location2: "31:2:19"
                                 type2: Int
                   - scenario:
                       name: "*"
@@ -1452,14 +1409,14 @@
                               const x = true * true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Times
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Times
                                 type: Bool
-                                position: 32:2:20-35:2:23
+                                location: 32:2:20-35:2:23
                         - name: "3 * 1"
                           input: |
                             fun main() {
@@ -1470,17 +1427,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Int
+                                      t: Int
                                       op: Times
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 * 43.2"
                           input: |
                             fun main() {
@@ -1491,32 +1446,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Float
+                                      t: Float
                                       op: Times
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 * true"
                           input: |
                             fun main() {
                               const x = 1 * true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Times
                                 type: Bool
-                                position: 29:2:17-32:2:20
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 29:2:17-32:2:20
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Times
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 29:2:17-32:2:20
+                                location2: 29:2:17-32:2:20
                                 type2: Bool
                         - name: "1.0 * 1"
                           input: |
@@ -1524,11 +1477,11 @@
                               const x = 1.0 * 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Times
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "31:2:19"
+                                location2: "31:2:19"
                                 type2: Int
                   - scenario:
                       name: "/"
@@ -1539,14 +1492,14 @@
                               const x = true / true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Divide
                                 type: Bool
-                                position: 25:2:13-28:2:16
-                            - BinaryExpressionRequiresOperandType:
+                                location: 25:2:13-28:2:16
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Divide
                                 type: Bool
-                                position: 32:2:20-35:2:23
+                                location: 32:2:20-35:2:23
                         - name: "3 / 1"
                           input: |
                             fun main() {
@@ -1557,17 +1510,15 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Int
+                                      t: Int
                                       op: Divide
                                       e1:
-                                        LiteralValue:
-                                          LiteralInt: '3'
+                                        LiteralInt: '3'
                                       e2:
-                                        LiteralValue:
-                                          LiteralInt: '1'
+                                        LiteralInt: '1'
                         - name: "1.234 / 43.2"
                           input: |
                             fun main() {
@@ -1578,32 +1529,30 @@
                               d: []
                               s:
                                 ConstantDeclarationStatement:
-                                  identifier: x
+                                  n: x
                                   e:
                                     BinaryExpression:
-                                      type: Float
+                                      t: Float
                                       op: Divide
                                       e1:
-                                        LiteralValue:
-                                          LiteralFloat: '1.234'
+                                        LiteralFloat: '1.234'
                                       e2:
-                                        LiteralValue:
-                                          LiteralFloat: '43.2'
+                                        LiteralFloat: '43.2'
                         - name: "1 / true"
                           input: |
                             fun main() {
                               const x = 1 / true;
                             }
                           output:
-                            - BinaryExpressionRequiresOperandType:
+                            - BinaryExpressionRequiresOperandTypeError:
                                 op: Divide
                                 type: Bool
-                                position: 29:2:17-32:2:20
-                            - BinaryExpressionOperandsIncompatible:
+                                location: 29:2:17-32:2:20
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Divide
-                                position1: "25:2:13"
+                                location1: "25:2:13"
                                 type1: Int
-                                position2: 29:2:17-32:2:20
+                                location2: 29:2:17-32:2:20
                                 type2: Bool
                         - name: "1.0 / 1"
                           input: |
@@ -1611,11 +1560,11 @@
                               const x = 1.0 / 1;
                             }
                           output:
-                            - BinaryExpressionOperandsIncompatible:
+                            - BinaryExpressionOperandsIncompatibleError:
                                 op: Divide
-                                position1: 25:2:13-27:2:15
+                                location1: 25:2:13-27:2:15
                                 type1: Float
-                                position2: "31:2:19"
+                                location2: "31:2:19"
                                 type2: Int
       - scenario:
           name: Unary
@@ -1633,21 +1582,19 @@
                         d: []
                         s:
                           ConstantDeclarationStatement:
-                            identifier: x
+                            n: x
                             e:
                               UnaryExpression:
-                                type: Int
+                                t: Int
                                 op: UnaryMinus
                                 e:
                                   BinaryExpression:
-                                    type: Int
+                                    t: Int
                                     op: Plus
                                     e1:
-                                      LiteralValue:
-                                        LiteralInt: '1'
+                                      LiteralInt: '1'
                                     e2:
-                                      LiteralValue:
-                                        LiteralInt: '1'
+                                      LiteralInt: '1'
                   - name: "-(1.0+1.0)"
                     input: |
                       fun main() {
@@ -1658,31 +1605,29 @@
                         d: []
                         s:
                           ConstantDeclarationStatement:
-                            identifier: x
+                            n: x
                             e:
                               UnaryExpression:
-                                type: Float
+                                t: Float
                                 op: UnaryMinus
                                 e:
                                   BinaryExpression:
-                                    type: Float
+                                    t: Float
                                     op: Plus
                                     e1:
-                                      LiteralValue:
-                                        LiteralFloat: '1.0'
+                                      LiteralFloat: '1.0'
                                     e2:
-                                      LiteralValue:
-                                        LiteralFloat: '1.0'
+                                      LiteralFloat: '1.0'
                   - name: "-true"
                     input: |
                       fun main() {
                         const x = -true;
                       }
                     output:
-                      - UnaryExpressionRequiresOperandType:
+                      - UnaryExpressionRequiresOperandTypeError:
                           op: UnaryMinus
                           type: Bool
-                          position: 26:2:14-29:2:17
+                          location: 26:2:14-29:2:17
             - scenario:
                 name: "+"
                 tests:
@@ -1696,21 +1641,19 @@
                         d: []
                         s:
                           ConstantDeclarationStatement:
-                            identifier: x
+                            n: x
                             e:
                               UnaryExpression:
-                                type: Int
+                                t: Int
                                 op: UnaryPlus
                                 e:
                                   BinaryExpression:
-                                    type: Int
+                                    t: Int
                                     op: Plus
                                     e1:
-                                      LiteralValue:
-                                        LiteralInt: '1'
+                                      LiteralInt: '1'
                                     e2:
-                                      LiteralValue:
-                                        LiteralInt: '1'
+                                      LiteralInt: '1'
                   - name: "+(1.0+1.0)"
                     input: |
                       fun main() {
@@ -1721,31 +1664,29 @@
                         d: []
                         s:
                           ConstantDeclarationStatement:
-                            identifier: x
+                            n: x
                             e:
                               UnaryExpression:
-                                type: Float
+                                t: Float
                                 op: UnaryPlus
                                 e:
                                   BinaryExpression:
-                                    type: Float
+                                    t: Float
                                     op: Plus
                                     e1:
-                                      LiteralValue:
-                                        LiteralFloat: '1.0'
+                                      LiteralFloat: '1.0'
                                     e2:
-                                      LiteralValue:
-                                        LiteralFloat: '1.0'
+                                      LiteralFloat: '1.0'
                   - name: "+true"
                     input: |
                       fun main() {
                         const x = +true;
                       }
                     output:
-                      - UnaryExpressionRequiresOperandType:
+                      - UnaryExpressionRequiresOperandTypeError:
                           op: UnaryPlus
                           type: Bool
-                          position: 26:2:14-29:2:17
+                          location: 26:2:14-29:2:17
             - scenario:
                 name: "!"
                 tests:
@@ -1755,20 +1696,20 @@
                         const x = !1;
                       }
                     output:
-                      - UnaryExpressionRequiresOperandType:
+                      - UnaryExpressionRequiresOperandTypeError:
                           op: UnaryNot
                           type: Int
-                          position: "26:2:14"
+                          location: "26:2:14"
                   - name: "!1.0"
                     input: |
                       fun main() {
                         const x = !1.0;
                       }
                     output:
-                      - UnaryExpressionRequiresOperandType:
+                      - UnaryExpressionRequiresOperandTypeError:
                           op: UnaryNot
                           type: Float
-                          position: 26:2:14-28:2:16
+                          location: 26:2:14-28:2:16
                   - name: "!true"
                     input: |
                       fun main() {
@@ -1779,14 +1720,13 @@
                         d: []
                         s:
                           ConstantDeclarationStatement:
-                            identifier: x
+                            n: x
                             e:
                               UnaryExpression:
-                                type: Bool
+                                t: Bool
                                 op: UnaryNot
                                 e:
-                                  LiteralValue:
-                                    LiteralBool: 'True'
+                                  LiteralBool: 'True'
       - scenario:
           name: Identifier Reference
           tests:
@@ -1806,18 +1746,17 @@
                           LiteralInt: '1'
                   s:
                     ConstantDeclarationStatement:
-                      identifier: x
+                      n: x
                       e:
                         BinaryExpression:
-                          type: Int
+                          t: Int
                           op: Plus
                           e1:
                             IdentifierReference:
-                              name: value
-                              type: Int
+                              n: value
+                              t: Int
                           e2:
-                            LiteralValue:
-                              LiteralInt: '2'
+                            LiteralInt: '2'
             - name: Reference global Float constant as Float
               input: |
                 const value = 1.0;
@@ -1834,18 +1773,17 @@
                           LiteralFloat: '1.0'
                   s:
                     ConstantDeclarationStatement:
-                      identifier: x
+                      n: x
                       e:
                         BinaryExpression:
-                          type: Float
+                          t: Float
                           op: Plus
                           e1:
                             IdentifierReference:
-                              name: value
-                              type: Float
+                              n: value
+                              t: Float
                           e2:
-                            LiteralValue:
-                              LiteralFloat: '2.1'
+                            LiteralFloat: '2.1'
             - name: Reference global Bool constant as Bool
               input: |
                 const value = false;
@@ -1862,18 +1800,17 @@
                           LiteralBool: 'False'
                   s:
                     ConstantDeclarationStatement:
-                      identifier: x
+                      n: x
                       e:
                         BinaryExpression:
-                          type: Bool
+                          t: Bool
                           op: And
                           e1:
                             IdentifierReference:
-                              name: value
-                              type: Bool
+                              n: value
+                              t: Bool
                           e2:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
             - name: Reference global Int variable as Int
               input: |
                 let value = 1;
@@ -1890,18 +1827,17 @@
                           LiteralInt: '1'
                   s:
                     ConstantDeclarationStatement:
-                      identifier: x
+                      n: x
                       e:
                         BinaryExpression:
-                          type: Int
+                          t: Int
                           op: Plus
                           e1:
                             IdentifierReference:
-                              name: value
-                              type: Int
+                              n: value
+                              t: Int
                           e2:
-                            LiteralValue:
-                              LiteralInt: '2'
+                            LiteralInt: '2'
             - name: Reference global Float variable as Float
               input: |
                 let value = 1.0;
@@ -1918,18 +1854,17 @@
                           LiteralFloat: '1.0'
                   s:
                     ConstantDeclarationStatement:
-                      identifier: x
+                      n: x
                       e:
                         BinaryExpression:
-                          type: Float
+                          t: Float
                           op: Plus
                           e1:
                             IdentifierReference:
-                              name: value
-                              type: Float
+                              n: value
+                              t: Float
                           e2:
-                            LiteralValue:
-                              LiteralFloat: '2.1'
+                            LiteralFloat: '2.1'
             - name: Reference global Bool variable as Bool
               input: |
                 let value = false;
@@ -1946,18 +1881,17 @@
                           LiteralBool: 'False'
                   s:
                     ConstantDeclarationStatement:
-                      identifier: x
+                      n: x
                       e:
                         BinaryExpression:
-                          type: Bool
+                          t: Bool
                           op: And
                           e1:
                             IdentifierReference:
-                              name: value
-                              type: Bool
+                              n: value
+                              t: Bool
                           e2:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
             - name: Reference function as value
               input: |
                 fun it() { }
@@ -1966,9 +1900,9 @@
                   const x = it;
                 }
               output:
-                - UnableToReferenceFunction:
+                - UnableToReferenceFunctionError:
                     name: it
-                    position: 38:4:13-39:4:14
+                    location: 38:4:13-39:4:14
             - name: Reference Int argument
               input: |
                 fun add(a: Int) {
@@ -1978,17 +1912,17 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: add
-                        arguments:
-                          - name: a
-                            type: Int
-                        s:
+                        n: add
+                        ps:
+                          - n: a
+                            t: Int
+                        ss:
                           - ConstantDeclarationStatement:
-                              identifier: x
+                              n: x
                               e:
                                 IdentifierReference:
-                                  name: a
-                                  type: Int
+                                  n: a
+                                  t: Int
                   s:
                     EmptyStatement: {}
             - name: Reference Float argument
@@ -2000,17 +1934,17 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: add
-                        arguments:
-                          - name: a
-                            type: Float
-                        s:
+                        n: add
+                        ps:
+                          - n: a
+                            t: Float
+                        ss:
                           - ConstantDeclarationStatement:
-                              identifier: x
+                              n: x
                               e:
                                 IdentifierReference:
-                                  name: a
-                                  type: Float
+                                  n: a
+                                  t: Float
                   s:
                     EmptyStatement: {}
             - name: Reference Bool argument
@@ -2022,17 +1956,17 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: add
-                        arguments:
-                          - name: a
-                            type: Bool
-                        s:
+                        n: add
+                        ps:
+                          - n: a
+                            t: Bool
+                        ss:
                           - ConstantDeclarationStatement:
-                              identifier: x
+                              n: x
                               e:
                                 IdentifierReference:
-                                  name: a
-                                  type: Bool
+                                  n: a
+                                  t: Bool
                   s:
                     EmptyStatement: {}
             - name: Reference Int constant in same lexical scope
@@ -2047,16 +1981,15 @@
                   s:
                     BlockStatement:
                       - ConstantDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '1'
+                            LiteralInt: '1'
                       - ConstantDeclarationStatement:
-                          identifier: 'y'
+                          n: 'y'
                           e:
                             IdentifierReference:
-                              name: x
-                              type: Int
+                              n: x
+                              t: Int
             - name: Reference Float constant in same lexical scope
               input: |
                 fun main() {
@@ -2069,16 +2002,15 @@
                   s:
                     BlockStatement:
                       - ConstantDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralFloat: '1.2'
+                            LiteralFloat: '1.2'
                       - ConstantDeclarationStatement:
-                          identifier: 'y'
+                          n: 'y'
                           e:
                             IdentifierReference:
-                              name: x
-                              type: Float
+                              n: x
+                              t: Float
             - name: Reference Bool constant in same lexical scope
               input: |
                 fun main() {
@@ -2091,16 +2023,15 @@
                   s:
                     BlockStatement:
                       - ConstantDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                       - ConstantDeclarationStatement:
-                          identifier: 'y'
+                          n: 'y'
                           e:
                             IdentifierReference:
-                              name: x
-                              type: Bool
+                              n: x
+                              t: Bool
             - name: Reference Int variable in same lexical scope
               input: |
                 fun main() {
@@ -2113,16 +2044,15 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '1'
+                            LiteralInt: '1'
                       - ConstantDeclarationStatement:
-                          identifier: 'y'
+                          n: 'y'
                           e:
                             IdentifierReference:
-                              name: x
-                              type: Int
+                              n: x
+                              t: Int
             - name: Reference Float variable in same lexical scope
               input: |
                 fun main() {
@@ -2135,16 +2065,15 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralFloat: '1.2'
+                            LiteralFloat: '1.2'
                       - ConstantDeclarationStatement:
-                          identifier: 'y'
+                          n: 'y'
                           e:
                             IdentifierReference:
-                              name: x
-                              type: Float
+                              n: x
+                              t: Float
             - name: Reference Bool variable in same lexical scope
               input: |
                 fun main() {
@@ -2157,16 +2086,15 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                       - ConstantDeclarationStatement:
-                          identifier: 'y'
+                          n: 'y'
                           e:
                             IdentifierReference:
-                              name: x
-                              type: Bool
+                              n: x
+                              t: Bool
             - name: Reference Int constant in outer lexical scope
               input: |
                 fun main() {
@@ -2182,17 +2110,16 @@
                   s:
                     BlockStatement:
                       - ConstantDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '1'
+                            LiteralInt: '1'
                       - BlockStatement:
                           - ConstantDeclarationStatement:
-                              identifier: 'y'
+                              n: 'y'
                               e:
                                 IdentifierReference:
-                                  name: x
-                                  type: Int
+                                  n: x
+                                  t: Int
             - name: Reference Float constant in outer lexical scope
               input: |
                 fun main() {
@@ -2208,17 +2135,16 @@
                   s:
                     BlockStatement:
                       - ConstantDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralFloat: '1.2'
+                            LiteralFloat: '1.2'
                       - BlockStatement:
                           - ConstantDeclarationStatement:
-                              identifier: 'y'
+                              n: 'y'
                               e:
                                 IdentifierReference:
-                                  name: x
-                                  type: Float
+                                  n: x
+                                  t: Float
             - name: Reference Bool constant in outer lexical scope
               input: |
                 fun main() {
@@ -2234,17 +2160,16 @@
                   s:
                     BlockStatement:
                       - ConstantDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                       - BlockStatement:
                           - ConstantDeclarationStatement:
-                              identifier: 'y'
+                              n: 'y'
                               e:
                                 IdentifierReference:
-                                  name: x
-                                  type: Bool
+                                  n: x
+                                  t: Bool
             - name: Reference Int variable in outer lexical scope
               input: |
                 fun main() {
@@ -2260,17 +2185,16 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '1'
+                            LiteralInt: '1'
                       - BlockStatement:
                           - ConstantDeclarationStatement:
-                              identifier: 'y'
+                              n: 'y'
                               e:
                                 IdentifierReference:
-                                  name: x
-                                  type: Int
+                                  n: x
+                                  t: Int
             - name: Reference Float variable in outer lexical scope
               input: |
                 fun main() {
@@ -2286,17 +2210,16 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralFloat: '1.2'
+                            LiteralFloat: '1.2'
                       - BlockStatement:
                           - ConstantDeclarationStatement:
-                              identifier: 'y'
+                              n: 'y'
                               e:
                                 IdentifierReference:
-                                  name: x
-                                  type: Float
+                                  n: x
+                                  t: Float
             - name: Reference Bool variable in outer lexical scope
               input: |
                 fun main() {
@@ -2312,26 +2235,25 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                       - BlockStatement:
                           - ConstantDeclarationStatement:
-                              identifier: 'y'
+                              n: 'y'
                               e:
                                 IdentifierReference:
-                                  name: x
-                                  type: Bool
+                                  n: x
+                                  t: Bool
             - name: Reference unknown identifier
               input: |
                 fun add(a: Int, b: Int) {
                   const x = y;
                 }
               output:
-                - UnknownIdentifier:
+                - UnknownIdentifierError:
                     name: 'y'
-                    position: "38:2:13"
+                    location: "38:2:13"
       - scenario:
           name: Call Expression
           tests:
@@ -2348,33 +2270,30 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: funny
-                        arguments:
-                          - name: a
-                            type: Int
-                          - name: b
-                            type: Float
-                          - name: c
-                            type: Bool
-                        s: []
+                        n: funny
+                        ps:
+                          - n: a
+                            t: Int
+                          - n: b
+                            t: Float
+                          - n: c
+                            t: Bool
+                        ss: []
                         e:
                           IdentifierReference:
-                            name: a
-                            type: Int
+                            n: a
+                            t: Int
                   s:
                     ConstantDeclarationStatement:
-                      identifier: r
+                      n: r
                       e:
                         CallExpression:
-                          type: Int
-                          name: funny
-                          parameters:
-                            - LiteralValue:
-                                LiteralInt: '0'
-                            - LiteralValue:
-                                LiteralFloat: '1.0'
-                            - LiteralValue:
-                                LiteralBool: 'True'
+                          t: Int
+                          n: funny
+                          args:
+                            - LiteralInt: '0'
+                            - LiteralFloat: '1.0'
+                            - LiteralBool: 'True'
             - name: Arguments and parameter cardinality mismatch
               input: |
                 fun add(a: Int, b: Int): Int {
@@ -2385,10 +2304,10 @@
                   const r = add(0);
                 }
               output:
-                - MismatchInNumberOfParameters:
-                    arguments: '1'
-                    parameters: '2'
-                    position: 75:6:13-77:6:15
+                - MismatchInNumberOfParametersError:
+                    arguments: 1
+                    parameters: 2
+                    location: 75:6:13-77:6:15
             - name: Arguments and parameter type mismatch
               input: |
                 fun add(a: Int, b: Int): Int {
@@ -2399,10 +2318,10 @@
                   const r = add(0, 1.1);
                 }
               output:
-                - IncompatibleArgumentType:
+                - IncompatibleArgumentTypeError:
                     argumentType: Float
                     parameterType: Int
-                    position: 82:6:20-84:6:22
+                    location: 82:6:20-84:6:22
             - name: Result does not return Int, Float or Bool
               input: |
                 fun add(a: Int, b: Int) {
@@ -2412,18 +2331,18 @@
                   const r = add(0, 1);
                 }
               output:
-                - UnableToCallUnitFunctionAsValueFunction:
+                - UnableToCallUnitFunctionAsValueFunctionError:
                     name: add
-                    position: 54:5:13-56:5:15
+                    location: 54:5:13-56:5:15
             - name: Unknown identifier
               input: |
                 fun main() {
                   const r = add(0, 1);
                 }
               output:
-                - UnknownIdentifier:
+                - UnknownIdentifierError:
                     name: add
-                    position: 25:2:13-27:2:15
+                    location: 25:2:13-27:2:15
             - name: Attempt to call a variable
               input: |
                 let add = 10;
@@ -2432,9 +2351,9 @@
                   const r = add(0, 1);
                 }
               output:
-                - UnableToCallVariableAsFunction:
+                - UnableToCallVariableAsFunctionError:
                     name: add
-                    position: 40:4:13-42:4:15
+                    location: 40:4:13-42:4:15
             - name: Attempt to call a constant
               input: |
                 const add = 10;
@@ -2443,9 +2362,9 @@
                   const r = add(0, 1);
                 }
               output:
-                - UnableToCallConstantAsFunction:
+                - UnableToCallConstantAsFunctionError:
                     name: add
-                    position: 42:4:13-44:4:15
+                    location: 42:4:13-44:4:15
 - scenario:
     name: Statements
     tests:
@@ -2465,15 +2384,13 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '1'
+                            LiteralInt: '1'
                       - AssignmentStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '2'
+                            LiteralInt: '2'
             - name: Float variable
               input: |
                 fun main() {
@@ -2487,15 +2404,13 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralFloat: '1.2'
+                            LiteralFloat: '1.2'
                       - AssignmentStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralFloat: '3.4'
+                            LiteralFloat: '3.4'
             - name: Bool variable
               input: |
                 fun main() {
@@ -2509,15 +2424,13 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                       - AssignmentStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralBool: 'False'
+                            LiteralBool: 'False'
             - name: Int constant
               input: |
                 fun main() {
@@ -2526,9 +2439,9 @@
                   x = 2;
                 }
               output:
-                - UnableToAssignToConstant:
+                - UnableToAssignToConstantError:
                     name: x
-                    position: "31:4:3"
+                    location: "31:4:3"
             - name: Float constant
               input: |
                 fun main() {
@@ -2537,9 +2450,9 @@
                   x = 2.0;
                 }
               output:
-                - UnableToAssignToConstant:
+                - UnableToAssignToConstantError:
                     name: x
-                    position: "33:4:3"
+                    location: "33:4:3"
             - name: Bool constant
               input: |
                 fun main() {
@@ -2548,9 +2461,9 @@
                   x = false;
                 }
               output:
-                - UnableToAssignToConstant:
+                - UnableToAssignToConstantError:
                     name: x
-                    position: "34:4:3"
+                    location: "34:4:3"
             - name: Function
               input: |
                 fun add(a: Int, b: Int): Int {
@@ -2561,9 +2474,9 @@
                   add = false;
                 }
               output:
-                - UnableToAssignToFunction:
+                - UnableToAssignToFunctionError:
                     name: add
-                    position: 65:6:3-67:6:5
+                    location: 65:6:3-67:6:5
             - name: Incompatible type assignment
               input: |
                 fun main() {
@@ -2572,20 +2485,20 @@
                   x = 1;
                 }
               output:
-                - UnableToAssignIncompatibleTypes:
+                - UnableToAssignIncompatibleTypesError:
                     type: Bool
-                    position: "32:4:3"
+                    location: "32:4:3"
                     expressionType: Int
-                    expressionPosition: "36:4:7"
+                    expressionLocation: "36:4:7"
             - name: Undefined variable
               input: |
                 fun main() {
                   x = false;
                 }
               output:
-                - UnknownIdentifier:
+                - UnknownIdentifierError:
                     name: x
-                    position: "15:2:3"
+                    location: "15:2:3"
       - scenario:
           name: If Then Else
           tests:
@@ -2603,20 +2516,17 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '0'
+                            LiteralInt: '0'
                       - IfThenElseStatement:
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                           s1:
                             AssignmentStatement:
-                              identifier: x
+                              n: x
                               e:
-                                LiteralValue:
-                                  LiteralInt: '1'
+                                LiteralInt: '1'
             - name: If e Then Else
               input: |
                 fun main() {
@@ -2633,26 +2543,22 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '0'
+                            LiteralInt: '0'
                       - IfThenElseStatement:
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                           s1:
                             AssignmentStatement:
-                              identifier: x
+                              n: x
                               e:
-                                LiteralValue:
-                                  LiteralInt: '1'
+                                LiteralInt: '1'
                           s2:
                             AssignmentStatement:
-                              identifier: x
+                              n: x
                               e:
-                                LiteralValue:
-                                  LiteralInt: '3'
+                                LiteralInt: '3'
             - name: If e Then guard not boolean
               input: |
                 fun main() {
@@ -2662,9 +2568,9 @@
                     x = 1;
                 }
               output:
-                - IfGuardNotBoolean:
+                - IfGuardNotBooleanError:
                     type: Int
-                    position: "32:4:6"
+                    location: "32:4:6"
             - name: If e Then Else guard not boolean
               input: |
                 fun main() {
@@ -2676,9 +2582,9 @@
                     x = 3;
                 }
               output:
-                - IfGuardNotBoolean:
+                - IfGuardNotBooleanError:
                     type: Int
-                    position: "32:4:6"
+                    location: "32:4:6"
       - scenario:
           name: While
           tests:
@@ -2696,28 +2602,25 @@
                   s:
                     BlockStatement:
                       - VariableDeclarationStatement:
-                          identifier: x
+                          n: x
                           e:
-                            LiteralValue:
-                              LiteralInt: '0'
+                            LiteralInt: '0'
                       - WhileStatement:
                           e:
-                            LiteralValue:
-                              LiteralBool: 'True'
+                            LiteralBool: 'True'
                           s:
                             AssignmentStatement:
-                              identifier: x
+                              n: x
                               e:
                                 BinaryExpression:
-                                  type: Int
+                                  t: Int
                                   op: Plus
                                   e1:
                                     IdentifierReference:
-                                      name: x
-                                      type: Int
+                                      n: x
+                                      t: Int
                                   e2:
-                                    LiteralValue:
-                                      LiteralInt: '1'
+                                    LiteralInt: '1'
             - name: While guard not boolean
               input: |
                 fun main() {
@@ -2728,9 +2631,9 @@
                   }
                 }
               output:
-                - WhileGuardNotBoolean:
+                - WhileGuardNotBooleanError:
                     type: Int
-                    position: "35:4:9"
+                    location: "35:4:9"
       - scenario:
           name: Call
           tests:
@@ -2743,12 +2646,12 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: something
-                        arguments: []
-                        s:
+                        n: something
+                        ps: []
+                        ss:
                           - CallStatement:
-                              identifier: something
-                              parameters: []
+                              n: something
+                              args: []
                   s:
                     EmptyStatement: {}
             - name: Unit function with arguments
@@ -2760,24 +2663,21 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: something
-                        arguments:
-                          - name: a
-                            type: Int
-                          - name: b
-                            type: Float
-                          - name: c
-                            type: Bool
-                        s:
+                        n: something
+                        ps:
+                          - n: a
+                            t: Int
+                          - n: b
+                            t: Float
+                          - n: c
+                            t: Bool
+                        ss:
                           - CallStatement:
-                              identifier: something
-                              parameters:
-                                - LiteralValue:
-                                    LiteralInt: '1'
-                                - LiteralValue:
-                                    LiteralFloat: '2.0'
-                                - LiteralValue:
-                                    LiteralBool: 'True'
+                              n: something
+                              args:
+                                - LiteralInt: '1'
+                                - LiteralFloat: '2.0'
+                                - LiteralBool: 'True'
                   s:
                     EmptyStatement: {}
             - name: Non-function with arguments
@@ -2788,28 +2688,28 @@
                   return true;
                 }
               output:
-                - UnableToCallValueFunctionAsUnitFunction:
+                - UnableToCallValueFunctionAsUnitFunctionError:
                     name: something
-                    position: 26:2:3-34:2:11
+                    location: 26:2:3-34:2:11
             - name: Undefined function
               input: |
                 fun something() {
                   somethingElse();
                 }
               output:
-                - UnknownIdentifier:
+                - UnknownIdentifierError:
                     name: somethingElse
-                    position: 20:2:3-32:2:15
+                    location: 20:2:3-32:2:15
             - name: Mismatch in argument and parameter cardinality
               input: |
                 fun something(a: Int) {
                   something(1, 2.0);
                 }
               output:
-                - MismatchInNumberOfParameters:
-                    arguments: '2'
-                    parameters: '1'
-                    position: 26:2:3-34:2:11
+                - MismatchInNumberOfParametersError:
+                    arguments: 2
+                    parameters: 1
+                    location: 26:2:3-34:2:11
             - name: print
               input: |
                 fun something(a: Int, b: Float, c: Bool) {
@@ -2819,33 +2719,30 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: something
-                        arguments:
-                          - name: a
-                            type: Int
-                          - name: b
-                            type: Float
-                          - name: c
-                            type: Bool
-                        s:
+                        n: something
+                        ps:
+                          - n: a
+                            t: Int
+                          - n: b
+                            t: Float
+                          - n: c
+                            t: Bool
+                        ss:
                           - CallStatement:
-                              identifier: print
-                              parameters:
-                                - LiteralValue:
-                                    LiteralString: '"Hello: "'
+                              n: print
+                              args:
+                                - LiteralString: '"Hello: "'
                                 - IdentifierReference:
-                                    name: a
-                                    type: Int
-                                - LiteralValue:
-                                    LiteralString: '", "'
+                                    n: a
+                                    t: Int
+                                - LiteralString: '", "'
                                 - IdentifierReference:
-                                    name: b
-                                    type: Float
-                                - LiteralValue:
-                                    LiteralString: '", "'
+                                    n: b
+                                    t: Float
+                                - LiteralString: '", "'
                                 - IdentifierReference:
-                                    name: c
-                                    type: Bool
+                                    n: c
+                                    t: Bool
                   s:
                     EmptyStatement: {}
             - name: println
@@ -2857,33 +2754,30 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: something
-                        arguments:
-                          - name: a
-                            type: Int
-                          - name: b
-                            type: Float
-                          - name: c
-                            type: Bool
-                        s:
+                        n: something
+                        ps:
+                          - n: a
+                            t: Int
+                          - n: b
+                            t: Float
+                          - n: c
+                            t: Bool
+                        ss:
                           - CallStatement:
-                              identifier: println
-                              parameters:
-                                - LiteralValue:
-                                    LiteralString: '"Hello: "'
+                              n: println
+                              args:
+                                - LiteralString: '"Hello: "'
                                 - IdentifierReference:
-                                    name: a
-                                    type: Int
-                                - LiteralValue:
-                                    LiteralString: '", "'
+                                    n: a
+                                    t: Int
+                                - LiteralString: '", "'
                                 - IdentifierReference:
-                                    name: b
-                                    type: Float
-                                - LiteralValue:
-                                    LiteralString: '", "'
+                                    n: b
+                                    t: Float
+                                - LiteralString: '", "'
                                 - IdentifierReference:
-                                    name: c
-                                    type: Bool
+                                    n: c
+                                    t: Bool
                   s:
                     EmptyStatement: {}
 - scenario:
@@ -2910,18 +2804,18 @@
 
                 const x = true;
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: x
-                    position: "23:3:7"
+                    location: "23:3:7"
             - name: "duplicate declaration - let const"
               input: |
                 let x = true;
 
                 const x = true;
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: x
-                    position: "21:3:7"
+                    location: "21:3:7"
       - scenario:
           name: Variable
           tests:
@@ -2943,18 +2837,18 @@
 
                 let x = true;
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: x
-                    position: "19:3:5"
+                    location: "19:3:5"
             - name: "duplicate declaration - const let"
               input: |
                 const x = true;
 
                 let x = true;
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: x
-                    position: "21:3:5"
+                    location: "21:3:5"
       - scenario:
           name: Function
           tests:
@@ -2972,34 +2866,34 @@
 
                 fun fred() {}
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: fred
-                    position: 19:3:5-22:3:8
+                    location: 19:3:5-22:3:8
             - name: "duplicate declaration - let fun"
               input: |
                 let fred = 1.0;
 
                 fun fred() {}
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: fred
-                    position: 21:3:5-24:3:8
+                    location: 21:3:5-24:3:8
             - name: "duplicate declaration - const fun"
               input: |
                 const fred = 1.0;
 
                 fun fred() {}
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: fred
-                    position: 23:3:5-26:3:8
+                    location: 23:3:5-26:3:8
             - name: "duplicate argument name in function declaration"
               input: |
                 fun fred(a: Int, b: Int, a: Float) {}
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: a
-                    position: "25:1:26"
+                    location: "25:1:26"
             - name: "argument name in function declaration may override global declaration"
               input: |
                 const a = 1.0;
@@ -3013,13 +2907,13 @@
                         e:
                           LiteralFloat: '1.0'
                     - FunctionDeclaration:
-                        identifier: add
-                        arguments:
-                          - name: a
-                            type: Int
-                          - name: b
-                            type: Int
-                        s: []
+                        n: add
+                        ps:
+                          - n: a
+                            t: Int
+                          - n: b
+                            t: Int
+                        ss: []
                   s:
                     EmptyStatement: {}
             - name: "duplicate declaration of main"
@@ -3028,36 +2922,36 @@
 
                 fun main() {}
               output:
-                - AttemptToRedefineDeclaration:
+                - AttemptToRedefineDeclarationError:
                     name: main
-                    position: 19:3:5-22:3:8
+                    location: 19:3:5-22:3:8
             - name: "declare value function called main"
               input: |
                 fun main(): Int {
                   return 1;
                 }
               output:
-                - InvalidDeclarationOfMain:
-                    position: 4:1:5-7:1:8
+                - InvalidDeclarationOfMainError:
+                    location: 4:1:5-7:1:8
             - name: "declare constant called main"
               input: |
                 const main = 1;
               output:
-                - InvalidDeclarationOfMain:
-                    position: 6:1:7-9:1:10
+                - InvalidDeclarationOfMainError:
+                    location: 6:1:7-9:1:10
             - name: "declare variable called main"
               input: |
                 let main = 1;
               output:
-                - InvalidDeclarationOfMain:
-                    position: 4:1:5-7:1:8
+                - InvalidDeclarationOfMainError:
+                    location: 4:1:5-7:1:8
             - name: "declare unit function called main with parameters"
               input: |
                 fun main(a: Int) {
                 }
               output:
-                - InvalidDeclarationOfMain:
-                    position: 4:1:5-7:1:8
+                - InvalidDeclarationOfMainError:
+                    location: 4:1:5-7:1:8
             - name: "functions are mutually recursive"
               input: |
                 fun one() {
@@ -3071,19 +2965,19 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: one
-                        arguments: []
-                        s:
+                        n: one
+                        ps: []
+                        ss:
                           - CallStatement:
-                              identifier: two
-                              parameters: []
+                              n: two
+                              args: []
                     - FunctionDeclaration:
-                        identifier: two
-                        arguments: []
-                        s:
+                        n: two
+                        ps: []
+                        ss:
                           - CallStatement:
-                              identifier: one
-                              parameters: []
+                              n: one
+                              args: []
                   s:
                     EmptyStatement: {}
             - name: "main recursively calls itself"
@@ -3096,8 +2990,8 @@
                   d: []
                   s:
                     CallStatement:
-                      identifier: main
-                      parameters: []
+                      n: main
+                      args: []
             - name: "function recursively calls main"
               input: |
                 fun add() {
@@ -3111,14 +3005,14 @@
                 Program:
                   d:
                     - FunctionDeclaration:
-                        identifier: add
-                        arguments: []
-                        s:
+                        n: add
+                        ps: []
+                        ss:
                           - CallStatement:
-                              identifier: main
-                              parameters: []
+                              n: main
+                              args: []
                   s:
                     CallStatement:
-                      identifier: main
-                      parameters: []
+                      n: main
+                      args: []
 
