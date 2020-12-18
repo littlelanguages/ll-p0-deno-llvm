@@ -22,21 +22,12 @@ jobs:
         uses: denolib/setup-deno@v2
         with:
           deno-version: ${{ matrix.deno-version }}
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "11.0"
-          directory: ${{ runner.temp }}/llvm
       - name: Check LLVM
         run: |
-          export PATH=${{ runner.temp }}/llvm/bin:$PATH
-          export LDFLAGS="-L${{ runner.temp }}/llvm/lib"
-          export CPPFLAGS="-I${{ runner.temp }}/llvm/include"
-
-          llvm-as --version
-          clang --version
-          llvm-link --version
-          lli --version
+          llvm-as-9 --version
+          clang-9 --version
+          llvm-link-9 --version
+          lli-9 --version
       - name: Build ll-p0-deno-llvm
         run: .bin/build.sh
       - name: Test ll-p0-deno-llvm
