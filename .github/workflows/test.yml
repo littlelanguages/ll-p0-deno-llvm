@@ -30,8 +30,7 @@ jobs:
       - name: Check LLVM
         run: |
           ls -Fal /usr/bin
-          echo ${{ runner.temp }}/llvm
-          ls -Fal ${{ runner.temp }}/llvm
+          ls -Fal ${{ runner.temp }}/llvm/bin
           llvm-as --version
           clang --version
           llvm-link --version
