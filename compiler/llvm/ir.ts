@@ -1,6 +1,9 @@
 export type Module = {
   tag: "Module";
   id: string;
+
+  externalDeclarations: Array<ExternalDeclaration>;
+  functionDeclarations: Array<FunctionDeclaration>;
 };
 
 export type Type =
@@ -67,8 +70,8 @@ export const doubleFP: DoubleFP = { tag: "Type-DoubleFP" };
 
 export type FunctionType = {
   tag: "Type-Function";
-  result: Type;
   arguments: Array<Type>;
+  result: Type;
   isVarArg: boolean;
 };
 
@@ -78,8 +81,8 @@ export const functionType = (
   isVarArg: boolean = false,
 ): FunctionType => ({
   tag: "Type-Function",
-  result,
   arguments: args,
+  result,
   isVarArg,
 });
 
@@ -136,3 +139,120 @@ export const typeToString = (type: Type): string =>
       ? `<{ ${type.elements.map(typeToString).join(", ")} }>`
       : `{ ${type.elements.map(typeToString).join(", ")} }`)
     : `[${type.size} x ${typeToString(type.element)}]`;
+
+export type ExternalDeclaration = {
+  tag: "ExternalDeclaration";
+  name: string;
+  arguments: Array<Type>;
+  result: Type;
+};
+
+export type FunctionDeclaration = {
+  tag: "FunctionDeclaration";
+  name: string;
+  arguments: Array<[string, Type]>;
+  result: Type;
+  body: Body;
+};
+
+export type Body = Array<Instruction>;
+
+export type Operand = LocalReference | Constant;
+
+export type LocalReference = {
+  tag: "LocalReference";
+  type: Type;
+  name: string;
+};
+
+export type Constant = CInt | CFloatSingle | CAdd | CFAdd | CGetElementPtr;
+
+export type CInt = {
+  tag: "CInt";
+  bits: number;
+  value: number;
+};
+
+export type CFloatSingle = {
+  tag: "CFloatSingle";
+  value: number;
+};
+
+export type CAdd = {
+  tag: "CAdd";
+  nsw: boolean;
+  nuw: boolean;
+  operand0: Constant;
+  operand1: Constant;
+};
+
+export type CFAdd = {
+  tag: "CFAdd";
+  operand0: Constant;
+  operand1: Constant;
+};
+
+export type CGetElementPtr = {
+  tag: "CGetElementPtr";
+  inBounds: boolean;
+  address: Constant;
+  indices: Array<Constant>;
+};
+
+const constantToString = (c: Constant): string =>
+  c.tag === "CInt" ? `i${c.bits} ${c.value}` : (function () {
+    throw new Error(`TODO: constantToString: ${c.tag}`);
+  })();
+
+export type Instruction = ILabel | IRet;
+
+export type ILabel = {
+  tag: "ILabel";
+  name: string;
+};
+
+export type IRet = {
+  tag: "IRet";
+  c: Constant;
+};
+
+export const write = async (
+  module: Module,
+  w: TextWriter,
+): Promise<void> => {
+  const writeFunctionDeclaration = async (d: FunctionDeclaration) => {
+    await w.write(
+      `\ndefine external ccc ${typeToString(d.result)} @${d.name}(${
+        d.arguments.map(([n, t]) => `${typeToString(t)} %${n}}`).join(", ")
+      }) {\n`,
+    );
+
+    for (const s of d.body) {
+      if (s.tag === "ILabel") {
+        await w.write(`${s.name}:\n`);
+      } else {
+        await w.write(`  ret ${constantToString(s.c)}\n`);
+      }
+    }
+
+    await w.write("}");
+  };
+
+  await w.write(`; ModuleID = '${module.id}'\n`);
+
+  for (const d of module.functionDeclarations) {
+    await writeFunctionDeclaration(d);
+  }
+};
+
+export interface TextWriter {
+  write(text: string): Promise<number>;
+}
+
+export const textWriter = (w: Deno.Writer): TextWriter => {
+  const encoder = new TextEncoder();
+
+  return {
+    write: (text: string): Promise<number> => w.write(encoder.encode(text)),
+  };
+};

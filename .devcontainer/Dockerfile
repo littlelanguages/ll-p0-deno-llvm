@@ -10,3 +10,10 @@ ENV PATH=${DENO_INSTALL}/bin:${PATH} \
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
    && apt-get -y install --no-install-recommends entr
+
+# RUN apt install lsb-release wget software-properties-common \
+
+RUN apt-get -y install lsb-release wget software-properties-common \
+    && wget https://apt.llvm.org/llvm.sh \
+    && chmod +x llvm.sh \
+    && sudo ./llvm.sh 11

@@ -1,0 +1,5 @@
+tests/p0lib.o
+tests/test.bc
+tests/test.ll
+tests/test.o
+llvm.sh

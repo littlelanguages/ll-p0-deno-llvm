@@ -8,4 +8,4 @@ then
     exit -1
 fi
 
-deno test --allow-read --allow-net
+deno test --allow-read --allow-net --allow-write --allow-run
