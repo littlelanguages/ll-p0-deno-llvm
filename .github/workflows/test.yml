@@ -29,14 +29,17 @@ jobs:
           directory: ${{ runner.temp }}/llvm
       - name: Check LLVM
         run: |
-          llvm-as-11 --version
-          clang-11 --version
-          llvm-link-11 --version
-          lli-11 --version
+          ls -Fal /usr/bin
+          echo ${{ runner.temp }}/llvm
+          ls -Fal ${{ runner.temp }}/llvm
           llvm-as --version
           clang --version
           llvm-link --version
           lli --version
+          llvm-as-11 --version
+          clang-11 --version
+          llvm-link-11 --version
+          lli-11 --version
       - name: Build ll-p0-deno-llvm
         run: .bin/build.sh
       - name: Test ll-p0-deno-llvm
