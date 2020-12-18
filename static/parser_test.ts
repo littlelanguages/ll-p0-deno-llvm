@@ -1,7 +1,7 @@
-import { readYaml } from "https://deno.land/x/garn_yaml@0.2.1/mod.ts";
+import { readYaml } from "../deps/garn_yaml.ts";
 
-import { assertEquals } from "https://deno.land/std@0.76.0/testing/asserts.ts";
-import { Location } from "https://raw.githubusercontent.com/littlelanguages/scanpiler-deno-lib/0.1.1/location.ts";
+import { assertEquals } from "../deps/asserts.ts";
+import { Location } from "../deps/location.ts";
 import { parse } from "./parser.ts";
 import {
   BinaryOp,

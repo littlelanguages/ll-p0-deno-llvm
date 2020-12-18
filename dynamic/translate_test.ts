@@ -1,9 +1,6 @@
-import { readYaml } from "https://deno.land/x/garn_yaml@0.2.1/mod.ts";
+import { readYaml } from "../deps/garn_yaml.ts";
 
-import {
-  assertEquals,
-  fail,
-} from "https://deno.land/std@0.76.0/testing/asserts.ts";
+import { assertEquals, fail } from "../deps/asserts.ts";
 import { translate, typeOf } from "./translate.ts";
 import { BinaryOp, Type, UnaryOp } from "./tst.ts";
 
