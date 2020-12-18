@@ -29,9 +29,8 @@ jobs:
           directory: ${{ runner.temp }}/llvm
       - name: Check LLVM
         run: |
-          ls -Fal /usr/bin
           ls -Fal ${{ runner.temp }}/llvm/bin
-          ${{ runner.temp }}/llvm/bin/llvm-as-11 --version
+          ${{ runner.temp }}/llvm/bin/llvm-as --version
           llvm-as-9 --version
           clang --version
           llvm-link --version
