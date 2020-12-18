@@ -12,7 +12,8 @@ jobs:
 
     strategy:
       matrix:
-        deno-version: [1.3.2, 1.4.6, 1.5.1]
+        deno-version: [1.5.1]
+        # deno-version: [1.3.2, 1.4.6, 1.5.1]
 
     steps:
       - name: Checkout
@@ -26,6 +27,16 @@ jobs:
         with:
           version: "11.0"
           directory: ${{ runner.temp }}/llvm
+      - name: Check LLVM
+        run: |
+          llvm-as-11 --version
+          clang-11 --version
+          llvm-link-11 --version
+          lli-11 --version
+          llvm-as --version
+          clang --version
+          llvm-link --version
+          lli --version
       - name: Build ll-p0-deno-llvm
         run: .bin/build.sh
       - name: Test ll-p0-deno-llvm
