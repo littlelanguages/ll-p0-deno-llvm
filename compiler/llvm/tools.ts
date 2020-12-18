@@ -14,7 +14,7 @@ export const assemble = async (
   targetFileName: string,
 ): Promise<IExecResponse> => {
   return await exec(
-    `llvm-as-11 ${sourceFileName} -o ${targetFileName}`,
+    `llvm-as-9 ${sourceFileName} -o ${targetFileName}`,
     { output: OutputMode.Capture },
   );
 };
@@ -24,7 +24,7 @@ export const compile = async (
   targetFileName: string,
 ): Promise<IExecResponse> => {
   return await exec(
-    `clang-11 -c -emit-llvm ${sourceFileName} -o ${targetFileName}`,
+    `clang-9 -c -emit-llvm ${sourceFileName} -o ${targetFileName}`,
     { output: OutputMode.Capture },
   );
 };
@@ -34,7 +34,7 @@ export const link = async (
   targetFileName: string,
 ): Promise<IExecResponse> => {
   return await exec(
-    `llvm-link-11 ${sourceFileNames.join(" ")} -o ${targetFileName}`,
+    `llvm-link-9 ${sourceFileNames.join(" ")} -o ${targetFileName}`,
     { output: OutputMode.Capture },
   );
 };
@@ -44,7 +44,7 @@ export const run = async (
   args: Array<string>,
 ): Promise<IExecResponse> => {
   return await exec(
-    `lli-11 ${targetFileName} ${args.join(" ")}`,
+    `lli-9 ${targetFileName} ${args.join(" ")}`,
     { output: OutputMode.Capture },
   );
 };
