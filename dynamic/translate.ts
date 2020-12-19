@@ -276,7 +276,10 @@ const p = (p: AST.Program): Either<Errors, Program> => {
         }
         return { tag: "LiteralFloat", v };
       } else {
-        return { tag: "LiteralString", v: lv.value };
+        return {
+          tag: "LiteralString",
+          v: lv.value.substr(1, lv.value.length - 2),
+        };
       }
     },
 

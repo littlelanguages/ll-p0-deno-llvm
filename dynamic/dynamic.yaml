@@ -2731,15 +2731,15 @@
                           - CallStatement:
                               n: print
                               args:
-                                - LiteralString: '"Hello: "'
+                                - LiteralString: 'Hello: '
                                 - IdentifierReference:
                                     n: a
                                     t: Int
-                                - LiteralString: '", "'
+                                - LiteralString: ', '
                                 - IdentifierReference:
                                     n: b
                                     t: Float
-                                - LiteralString: '", "'
+                                - LiteralString: ', '
                                 - IdentifierReference:
                                     n: c
                                     t: Bool
@@ -2766,15 +2766,15 @@
                           - CallStatement:
                               n: println
                               args:
-                                - LiteralString: '"Hello: "'
+                                - LiteralString: 'Hello: '
                                 - IdentifierReference:
                                     n: a
                                     t: Int
-                                - LiteralString: '", "'
+                                - LiteralString: ', '
                                 - IdentifierReference:
                                     n: b
                                     t: Float
-                                - LiteralString: '", "'
+                                - LiteralString: ', '
                                 - IdentifierReference:
                                     n: c
                                     t: Bool
