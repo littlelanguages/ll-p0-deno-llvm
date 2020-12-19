@@ -1,16 +1,17 @@
 import { readYaml } from "../deps/garn_yaml.ts";
 import { translate } from "../dynamic/translate.ts";
-import * as IR from "./llvm/ir.ts";
 import * as Tools from "./llvm/tools.ts";
 import { IExecResponse } from "../deps/exec.ts";
 
-import { assertEquals, fail } from "../deps/asserts.ts";
 import { compile } from "./compiler.ts";
 
 const testAll = (content: any): Promise<any> => {
   const testItem = (content: any, path: Array<string>): Promise<any> =>
     (Array.isArray(content))
-      ? Promise.all(content.map((t) => testItem(t, path)))
+      ? content.reduce(
+        (token, test) => token.then(() => testItem(test, path)),
+        Promise.resolve(),
+      )
       : (content.scenario !== undefined)
       ? testItem(content.scenario.tests, [...path, content.scenario.name])
       : translate(content.input)
@@ -40,7 +41,10 @@ const testAll = (content: any): Promise<any> => {
         );
 
   return (Array.isArray(content))
-    ? Promise.all(content.map(testAll))
+    ? content.reduce(
+      (token, test) => token.then(() => testAll(test)),
+      Promise.resolve(),
+    )
     : testItem(content, []);
 };
 
