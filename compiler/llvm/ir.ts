@@ -3,6 +3,7 @@ export type Module = {
   id: string;
 
   externalDeclarations: Array<ExternalDeclaration>;
+  globalDeclarations: Array<GlobalDeclaration>;
   functionDeclarations: Array<FunctionDeclaration>;
 };
 
@@ -147,6 +148,13 @@ export type ExternalDeclaration = {
   result: Type;
 };
 
+export type GlobalDeclaration = {
+  tag: "GlobalDeclaration";
+  name: string;
+  type: Type;
+  value: Constant;
+};
+
 export type FunctionDeclaration = {
   tag: "FunctionDeclaration";
   name: string;
@@ -165,7 +173,15 @@ export type LocalReference = {
   name: string;
 };
 
-export type Constant = CInt | CFloatSingle | CAdd | CFAdd | CGetElementPtr;
+export type Constant =
+  | CInt
+  | CFloatSingle
+  | CArray
+  | CAdd
+  | CFAdd
+  | CGetElementPtr
+  | CGlobalReference
+  | CZext;
 
 export type CInt = {
   tag: "CInt";
@@ -176,6 +192,12 @@ export type CInt = {
 export type CFloatSingle = {
   tag: "CFloatSingle";
   value: number;
+};
+
+export type CArray = {
+  tag: "CArray";
+  memberType: Type;
+  values: Array<Constant>;
 };
 
 export type CAdd = {
@@ -192,19 +214,53 @@ export type CFAdd = {
   operand1: Constant;
 };
 
+export type CGlobalReference = {
+  tag: "CGlobalReference";
+  type: Type;
+  name: string;
+};
+
 export type CGetElementPtr = {
   tag: "CGetElementPtr";
   inBounds: boolean;
+  type: Type;
+  elementType: Type;
   address: Constant;
   indices: Array<Constant>;
 };
 
-const constantToString = (c: Constant): string =>
-  c.tag === "CInt" ? `i${c.bits} ${c.value}` : (function () {
-    throw new Error(`TODO: constantToString: ${c.tag}`);
-  })();
+export type CZext = {
+  tag: "Czext";
+  operand: Operand;
+  type: Type;
+};
 
-export type Instruction = ILabel | IRet;
+const operandToString = (op: Operand): string =>
+  op.tag === "CInt"
+    ? `i${op.bits} ${op.value}`
+    : op.tag === "CArray"
+    ? `[${op.values.map(operandToString).join(", ")}]`
+    : op.tag === "CGetElementPtr"
+    ? `${typeToString(op.type)} getelementptr${
+      op.inBounds ? " inbounds" : ""
+    }(${typeToString(op.elementType)}, ${operandToString(op.address)}${
+      op.indices.map((i) => `, ${operandToString(i)}`).join("")
+    })`
+    : op.tag === "CGlobalReference"
+    ? `${typeToString(op.type)} @${op.name}`
+    : op.tag === "LocalReference"
+    ? `${typeToString(op.type)} @${op.name}`
+    : (function () {
+      throw new Error(`TODO: operandToString: ${op.tag}`);
+    })();
+
+export type Instruction = Icall | ILabel | IRet;
+
+export type Icall = {
+  tag: "Icall";
+  name: string;
+  arguments: Array<Operand>;
+};
 
 export type ILabel = {
   tag: "ILabel";
@@ -216,10 +272,24 @@ export type IRet = {
   c: Constant;
 };
 
-export const write = async (
+export const write = (
   module: Module,
   w: TextWriter,
 ): Promise<any> => {
+  const writeExternalDeclararion = (d: ExternalDeclaration): Promise<any> =>
+    w.write(
+      `\ndeclare external ccc ${typeToString(d.result)} @${d.name}(${
+        d.arguments.map(typeToString).join(", ")
+      })\n`,
+    );
+
+  const writeGlobalDeclaration = (d: GlobalDeclaration): Promise<any> =>
+    w.write(
+      `\n@${d.name} = unnamed_addr constant ${typeToString(d.type)} ${
+        operandToString(d.value)
+      }\n`,
+    );
+
   const writeFunctionDeclaration = (d: FunctionDeclaration): Promise<any> => {
     const header = w.write(
       `\ndefine external ccc ${typeToString(d.result)} @${d.name}(${
@@ -228,20 +298,33 @@ export const write = async (
     );
 
     return d.body.reduce((a, s) => {
-      const line = (s.tag === "ILabel")
+      const line = (s.tag === "Icall")
+        ? `  call ccc void @${s.name}(${
+          s.arguments.map(operandToString).join(", ")
+        })\n`
+        : (s.tag === "ILabel")
         ? `${s.name}:\n`
-        : `  ret ${constantToString(s.c)}\n`;
+        : `  ret ${operandToString(s.c)}\n`;
 
       return a.then(() => w.write(line));
     }, header).then(() => w.write("}"));
   };
 
   const p1 = w.write(`; ModuleID = '${module.id}'\n`);
-
-  return module.functionDeclarations.reduce(
-    (a, d) => a.then(() => writeFunctionDeclaration(d)),
+  const p2 = module.externalDeclarations.reduce(
+    (p, d) => p.then(() => writeExternalDeclararion(d)),
     p1,
   );
+  const p3 = module.globalDeclarations.reduce(
+    (p, d) => p.then(() => writeGlobalDeclaration(d)),
+    p2,
+  );
+  const p4 = module.functionDeclarations.reduce(
+    (p, d) => p.then(() => writeFunctionDeclaration(d)),
+    p3,
+  );
+
+  return p4;
 };
 
 export interface TextWriter {

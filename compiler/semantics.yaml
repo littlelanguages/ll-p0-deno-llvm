@@ -3,13 +3,13 @@
     fun main() {
     }
   output: ""
-# - name: Hello World
-#   input: |
-#     fun main() {
-#       println("Hello World");
-#     }
-#   output: |
-#     Hello World
+- name: Hello World
+  input: |
+    fun main() {
+      println("Hello World");
+    }
+  output: |
+    Hello World
 # - scenario:
 #     name: Expressions
 #     tests:
