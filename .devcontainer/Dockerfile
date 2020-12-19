@@ -16,4 +16,4 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 RUN apt-get -y install lsb-release wget software-properties-common \
     && wget https://apt.llvm.org/llvm.sh \
     && chmod +x llvm.sh \
-    && sudo ./llvm.sh 11
+    && sudo ./llvm.sh 9
