@@ -219,30 +219,29 @@ export type IRet = {
 export const write = async (
   module: Module,
   w: TextWriter,
-): Promise<void> => {
-  const writeFunctionDeclaration = async (d: FunctionDeclaration) => {
-    await w.write(
+): Promise<any> => {
+  const writeFunctionDeclaration = (d: FunctionDeclaration): Promise<any> => {
+    const header = w.write(
       `\ndefine external ccc ${typeToString(d.result)} @${d.name}(${
         d.arguments.map(([n, t]) => `${typeToString(t)} %${n}}`).join(", ")
       }) {\n`,
     );
 
-    for (const s of d.body) {
-      if (s.tag === "ILabel") {
-        await w.write(`${s.name}:\n`);
-      } else {
-        await w.write(`  ret ${constantToString(s.c)}\n`);
-      }
-    }
+    return d.body.reduce((a, s) => {
+      const line = (s.tag === "ILabel")
+        ? `${s.name}:\n`
+        : `  ret ${constantToString(s.c)}\n`;
 
-    await w.write("}");
+      return a.then(() => w.write(line));
+    }, header).then(() => w.write("}"));
   };
 
-  await w.write(`; ModuleID = '${module.id}'\n`);
+  const p1 = w.write(`; ModuleID = '${module.id}'\n`);
 
-  for (const d of module.functionDeclarations) {
-    await writeFunctionDeclaration(d);
-  }
+  return module.functionDeclarations.reduce(
+    (a, d) => a.then(() => writeFunctionDeclaration(d)),
+    p1,
+  );
 };
 
 export interface TextWriter {

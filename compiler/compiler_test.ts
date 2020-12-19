@@ -8,68 +8,50 @@ import { assertEquals, fail } from "../deps/asserts.ts";
 import { compile } from "./compiler.ts";
 
 const testAll = (content: any): Promise<any> => {
-  const testItem = async (content: any, path: Array<string>): Promise<any> => {
-    if (Array.isArray(content)) {
-      return Promise.all(content.map((t) => testItem(t, path)));
-    } else if (content.scenario !== undefined) {
-      return testItem(content.scenario.tests, [...path, content.scenario.name]);
-    } else {
-      try {
-        await translate(content.input).either(
-          (es) => Promise.resolve(),
+  const testItem = (content: any, path: Array<string>): Promise<any> =>
+    (Array.isArray(content))
+      ? Promise.all(content.map((t) => testItem(t, path)))
+      : (content.scenario !== undefined)
+      ? testItem(content.scenario.tests, [...path, content.scenario.name])
+      : translate(content.input)
+        .either(
+          () => Promise.resolve(),
           (tst) => {
             const module = compile(tst);
 
             return Tools.write(module, "./tests/test.ll");
           },
+        )
+        .then(() => run(Tools.assemble("./tests/test.ll", "./tests/test.o")))
+        .then(() =>
+          run(
+            Tools.link(
+              ["./tests/test.o", "./tests/p0lib.o"],
+              "./tests/test.bc",
+            ),
+          )
+        )
+        .then(() => run(Tools.run("./tests/test.bc", [])))
+        .then((result) =>
+          result.output === content.output ? Promise.resolve() : Promise.reject(
+            [...path, content.name].join(":") + ": " +
+              JSON.stringify(content.input, null, 2),
+          )
         );
 
-        await run(Tools.assemble("./tests/test.ll", "./tests/test.o"));
-        await run(
-          Tools.link(["./tests/test.o", "./tests/p0lib.o"], "./tests/test.bc"),
-        );
-        const result = await run(Tools.run("./tests/test.bc", []));
-
-        assertEquals(
-          result.output,
-          content.output,
-          //   [...path, content.name].join(":") + ": " +
-          //     JSON.stringify(tst, null, 2),
-        );
-      } catch (e) {
-        fail(
-          [...path, content.name].join(":") + ": " +
-            JSON.stringify(content.input, null, 2) + ": " + e,
-        );
-      }
-    }
-  };
-
-  if (Array.isArray(content)) {
-    return Promise.all(content.map(testAll));
-  } else {
-    return testItem(content, []);
-  }
+  return (Array.isArray(content))
+    ? Promise.all(content.map(testAll))
+    : testItem(content, []);
 };
 
-const runTests = async () => {
-  await run(Tools.compile("./tests/p0lib.c", "./tests/p0lib.o"));
+const runTests = (): Promise<any> =>
+  run(Tools.compile("./tests/p0lib.c", "./tests/p0lib.o"))
+    .then(() => readYaml("./compiler/semantics.yaml"))
+    .then((content) => testAll(content));
 
-  const content = await readYaml("./compiler/semantics.yaml");
-
-  return testAll(content);
-};
-
-const run = async (
-  cmdResult: Promise<IExecResponse>,
-): Promise<IExecResponse> => {
-  const r = await cmdResult;
-
-  if (r.status.code !== 0) {
-    throw Error(JSON.stringify(r, null, 2));
-  }
-
-  return r;
-};
+const run = (cmdResult: Promise<IExecResponse>): Promise<IExecResponse> =>
+  cmdResult.then((r) =>
+    (r.status.code === 0) ? Promise.resolve(r) : Promise.reject(r)
+  );
 
 Deno.test("compile", async () => await runTests());
