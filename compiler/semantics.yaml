@@ -10,21 +10,21 @@
     }
   output: |
     Hello World
-# - scenario:
-#     name: Expressions
-#     tests:
-#       - scenario:
-#           name: Literal Value
-#           tests:
-#             - name: Literal Bool
-#               input: |
-#                 fun main() {
-#                   println(true);
-#                   println(false);
-#                 }
-#               output: |
-#                 true
-#                 false
+- scenario:
+    name: Expressions
+    tests:
+      - scenario:
+          name: Literal Value
+          tests:
+            - name: Literal Bool
+              input: |
+                fun main() {
+                  println(true);
+                  println(false);
+                }
+              output: |
+                true
+                false
 #             - name: Literal Int
 #               input: |
 #                 fun main() {

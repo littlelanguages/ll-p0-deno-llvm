@@ -84,6 +84,8 @@ const compileE = (
 ): IR.Operand => {
   if (e.tag === "LiteralInt") {
     return { tag: "CInt", bits: 32, value: e.v };
+  } else if (e.tag === "LiteralBool") {
+    return { tag: "CInt", bits: 1, value: e.v ? 1 : 0 };
   } else if (e.tag === "LiteralString") {
     const op = functionBuilder.strings.get(e.v);
 

@@ -248,6 +248,10 @@ const operandToString = (op: Operand): string =>
     })`
     : op.tag === "CGlobalReference"
     ? `${typeToString(op.type)} @${op.name}`
+    : op.tag === "Czext"
+    ? `${typeToString(op.type)} zext (${operandToString(op.operand)} to ${
+      typeToString(op.type)
+    })`
     : op.tag === "LocalReference"
     ? `${typeToString(op.type)} @${op.name}`
     : (function () {
