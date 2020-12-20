@@ -2,9 +2,9 @@ import * as TST from "../dynamic/tst.ts";
 import * as IR from "./llvm/ir.ts";
 import * as Builders from "./llvm/builders.ts";
 
-export const compile = (tst: TST.Program): IR.Module => {
+export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
   const moduleBuilder = Object.assign(
-    Builders.module("p0"),
+    Builders.module(name),
     { operands: new Map(), strings: new Map() },
   );
 
