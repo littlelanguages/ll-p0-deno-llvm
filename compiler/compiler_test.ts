@@ -2,62 +2,87 @@ import { readYaml } from "../deps/garn_yaml.ts";
 import { translate } from "../dynamic/translate.ts";
 import * as Tools from "./llvm/tools.ts";
 import { IExecResponse } from "../deps/exec.ts";
+import { assertEquals, fail } from "../deps/asserts.ts";
 
 import { compile } from "./compiler.ts";
 
-const testAll = (content: any): Promise<any> =>
-  (Array.isArray(content))
-    ? content.reduce(
-      (token, test) => token.then(() => testAll(test)),
-      Promise.resolve(),
-    )
-    : testItem(content, []);
+type TestItem = {
+  name: string;
+  input: string;
+  output: string;
+};
 
-const testItem = (content: any, path: Array<string>): Promise<any> =>
+const serialize = (content: any): Array<TestItem> =>
   (Array.isArray(content))
-    ? content.reduce(
-      (token, test) => token.then(() => testItem(test, path)),
-      Promise.resolve(),
-    )
+    ? content.flatMap(serialize)
+    : serializeItem(content, []);
+
+const serializeItem = (
+  content: any,
+  path: Array<string>,
+): Array<TestItem> =>
+  (Array.isArray(content))
+    ? content.flatMap((i) => serializeItem(i, path))
     : (content.scenario !== undefined)
-    ? testItem(content.scenario.tests, [...path, content.scenario.name])
-    : translate(content.input)
-      .either(
-        () => Promise.resolve(),
-        (tst) => {
-          const module = compile(tst);
+    ? serializeItem(content.scenario.tests, [...path, content.scenario.name])
+    : [
+      {
+        name: [...path, content.name].join(":"),
+        input: content.input,
+        output: content.output,
+      },
+    ];
 
-          return Tools.write(module, "./tests/test.ll");
-        },
+const runTestItem = (testItem: TestItem, index: number): Promise<void> => {
+  const name = `test_${index}`;
+
+  return translate(testItem.input)
+    .either(
+      () => Promise.resolve(),
+      (tst) => Tools.write(compile(tst, testItem.name), `./tests/${name}.ll`),
+    )
+    .then(() => run(Tools.assemble(`./tests/${name}.ll`, `./tests/${name}.o`)))
+    .then(() =>
+      run(
+        Tools.link(
+          [`./tests/${name}.o`, "./tests/p0lib.o"],
+          `./tests/${name}.bc`,
+        ),
       )
-      .then(() => run(Tools.assemble("./tests/test.ll", "./tests/test.o")))
-      .then(() =>
-        run(
-          Tools.link(
-            ["./tests/test.o", "./tests/p0lib.o"],
-            "./tests/test.bc",
-          ),
+    )
+    .then(() => run(Tools.run(`./tests/${name}.bc`, [])))
+    .then((result) =>
+      result.output.trim() === testItem.output.trim()
+        ? Promise.resolve()
+        : Promise.reject(
+          testItem.name + ": [" + result.output.trim() +
+            "] " +
+            testItem.output.trim() + "]",
         )
-      )
-      .then(() => run(Tools.run("./tests/test.bc", [])))
-      .then((result) =>
-        result.output.trim() === content.output.trim()
-          ? Promise.resolve()
-          : Promise.reject(
-            [...path, content.name].join(":") + ": [" + result.output.trim() +
-              "] " +
-              content.output.trim() + "]",
-          )
+    )
+    .catch((r) => {
+      console.log(
+        `***************** ${testItem.name} ${JSON.stringify(r, null, 2)}`,
       );
+      return fail(JSON.stringify(testItem, null, 2));
+    })
+    .then((_) => Promise.resolve());
+};
 
 const runTests = (): Promise<any> =>
   run(Tools.compile("./tests/p0lib.c", "./tests/p0lib.o"))
     .then(() => readYaml("./compiler/semantics.yaml"))
-    .then((content) => testAll(content));
+    .then((content) =>
+      Promise.all(
+        serialize(content).map((testItem, index) =>
+          runTestItem(testItem, index)
+        ),
+      )
+    );
 
 const run = (cmdResult: Promise<IExecResponse>): Promise<IExecResponse> =>
   cmdResult.then((r) =>
     (r.status.code === 0) ? Promise.resolve(r) : Promise.reject(r)
   );
 
-Deno.test("compile", async () => await runTests());
+Deno.test("compile", async (): Promise<any> => await runTests());
