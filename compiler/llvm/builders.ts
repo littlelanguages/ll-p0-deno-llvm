@@ -1,4 +1,3 @@
-import { Type } from "https://deno.land/std@0.79.0/encoding/_yaml/type.ts";
 import * as IR from "./ir.ts";
 
 export interface ModuleBuilder {
@@ -75,6 +74,7 @@ export interface FunctionBuilder {
   call(name: string, params: Array<IR.Operand>): void;
   label(name: string): void;
   ret(c: IR.Constant): void;
+  sub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
 
   declareGlobal(name: string, type: IR.Type, value: IR.Constant): void;
 
@@ -88,6 +88,7 @@ const functionBuilder = (
   module: ModuleBuilder,
 ) => ({
   labelCount: 1,
+  registerCount: 0,
   instructions: initialInstructions(),
 
   newLabel: function (prefix: string = ""): string {
@@ -106,6 +107,13 @@ const functionBuilder = (
 
   ret: function (c: IR.Constant) {
     this.instructions.push({ tag: "IRet", c });
+  },
+
+  sub: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
+    const result = `%${this.registerCount}`;
+    this.registerCount += 1;
+    this.instructions.push({ tag: "ISub", result, operand0, operand1 });
+    return { tag: "LocalReference", type: typeOf(operand0), name: result };
   },
 
   declareGlobal: (
@@ -128,3 +136,24 @@ const functionBuilder = (
 const initialInstructions = (): Array<
   IR.Instruction
 > => [{ tag: "ILabel", name: "entry_0" }];
+
+const typeOf = (o: IR.Operand): IR.Type =>
+  o.tag === "CAdd"
+    ? typeOf(o.operand0)
+    : o.tag === "CArray"
+    ? IR.pointerType(o.memberType)
+    : o.tag === "CFAdd"
+    ? typeOf(o.operand0)
+    : o.tag === "CFloatSingle"
+    ? IR.floatFP
+    : o.tag === "CGetElementPtr"
+    ? o.type
+    : o.tag === "CGlobalReference"
+    ? o.type
+    : o.tag === "CInt"
+    ? IR.integerType(o.bits)
+    : o.tag === "Czext"
+    ? o.type
+    : o.tag === "LocalReference"
+    ? o.type
+    : IR.i1;

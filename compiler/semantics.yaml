@@ -25,21 +25,21 @@
               output: |
                 true
                 false
-#             - name: Literal Int
-#               input: |
-#                 fun main() {
-#                   println(0);
-#                   println(1);
-#                   println(-1);
-#                   println(2147483647);
-#                   println(-2147483648);
-#                 }
-#               output: |
-#                 0
-#                 1
-#                 -1
-#                 2147483647
-#                 -2147483648
+            - name: Literal Int
+              input: |
+                fun main() {
+                  println(0);
+                  println(1);
+                  println(-1);
+                  println(2147483647);
+                  println(-2147483647);
+                }
+              output: |
+                0
+                1
+                -1
+                2147483647
+                -2147483647
 #             - name: Literal Float
 #               input: |
 #                 fun main() {

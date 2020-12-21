@@ -38,8 +38,15 @@ const runTestItem = (testItem: TestItem, index: number): Promise<void> => {
 
   return translate(testItem.input)
     .either(
-      () => Promise.resolve(),
-      (tst) => Tools.write(compile(tst, testItem.name), `./tests/${name}.ll`),
+      (e) => Promise.reject(e),
+      (tst) => {
+        try {
+          return Tools.write(compile(tst, testItem.name), `./tests/${name}.ll`);
+        } catch (e) {
+          console.log(`>>>>>>>>>>>>>> ${e}`);
+          return Promise.reject(e);
+        }
+      },
     )
     .then(() => run(Tools.assemble(`./tests/${name}.ll`, `./tests/${name}.o`)))
     .then(() =>
@@ -51,21 +58,19 @@ const runTestItem = (testItem: TestItem, index: number): Promise<void> => {
       )
     )
     .then(() => run(Tools.run(`./tests/${name}.bc`, [])))
-    .then((result) =>
-      result.output.trim() === testItem.output.trim()
-        ? Promise.resolve()
-        : Promise.reject(
-          testItem.name + ": [" + result.output.trim() +
-            "] " +
-            testItem.output.trim() + "]",
-        )
+    .then((result) => assertEquals(result.output.trim(), testItem.output.trim()) // ? Promise.resolve()
+      // : Promise.reject(
+      //   testItem.name + ": [" + result.output.trim() +
+      //     "] " +
+      //     testItem.output.trim() + "]",
+      // )
     )
-    .catch((r) => {
-      console.log(
-        `***************** ${testItem.name} ${JSON.stringify(r, null, 2)}`,
-      );
-      return fail(JSON.stringify(testItem, null, 2));
-    })
+    // .catch((r) => {
+    // console.log(
+    //   `***************** ${testItem.name} ${JSON.stringify(r, null, 2)}`,
+    // );
+    // return fail(JSON.stringify(testItem, null, 2));
+    // })
     .then((_) => Promise.resolve());
 };
 

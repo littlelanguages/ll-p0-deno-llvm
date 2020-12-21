@@ -9,11 +9,11 @@ export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
   );
 
   moduleBuilder
-    .declareExternal("_print_bool", [IR.i8], IR.voidType)
-    .declareExternal("_print_int", [IR.i32], IR.voidType)
-    .declareExternal("_print_string", [IR.pointerType(IR.i8)], IR.voidType)
-    .declareExternal("_print_float", [IR.floatFP], IR.voidType)
-    .declareExternal("_print_ln", [], IR.voidType);
+    .declareExternal("@_print_bool", [IR.i8], IR.voidType)
+    .declareExternal("@_print_int", [IR.i32], IR.voidType)
+    .declareExternal("@_print_string", [IR.pointerType(IR.i8)], IR.voidType)
+    .declareExternal("@_print_float", [IR.floatFP], IR.voidType)
+    .declareExternal("@_print_ln", [], IR.voidType);
 
   compileMain(tst, moduleBuilder);
 
@@ -24,7 +24,7 @@ const compileMain = (
   tst: TST.Program,
   moduleBuilder: ModuleBuilder,
 ) => {
-  const functionBuilder = declareFunction("main", [], IR.i32, moduleBuilder);
+  const functionBuilder = declareFunction("@main", [], IR.i32, moduleBuilder);
 
   compileS(tst.s, functionBuilder);
 
@@ -43,7 +43,7 @@ const compileS = (
       compilePrintStatement(s, functionBuilder);
     } else if (s.n === "println") {
       compilePrintStatement(s, functionBuilder);
-      functionBuilder.call("_print_ln", []);
+      functionBuilder.call("@_print_ln", []);
     } else {
       functionBuilder.call(
         s.n,
@@ -67,12 +67,12 @@ const compilePrintStatement = (
     }
     const name = et ===
         TST.Type.Bool
-      ? "_print_bool"
+      ? "@_print_bool"
       : et === TST.Type.Int
-      ? "_print_int"
+      ? "@_print_int"
       : et === TST.Type.String
-      ? "_print_string"
-      : "_print_float";
+      ? "@_print_string"
+      : "@_print_float";
 
     functionBuilder.call(name, [eo]);
   });
@@ -90,7 +90,7 @@ const compileE = (
     const op = functionBuilder.strings.get(e.v);
 
     if (op === undefined) {
-      const name = `_${functionBuilder.strings.size}.str`;
+      const name = `@_${functionBuilder.strings.size}.str`;
 
       functionBuilder.declareGlobal(
         name,
@@ -127,6 +127,20 @@ const compileE = (
       functionBuilder.strings.set(name, opp);
       return opp;
     } else {
+      return op;
+    }
+  } else if (e.tag === "UnaryExpression") {
+    const op = compileE(e.e, functionBuilder);
+
+    if (e.op === TST.UnaryOp.UnaryPlus) {
+      return op;
+    } else if (e.op === TST.UnaryOp.UnaryMinus) {
+      if (typeOf(e.e) === TST.Type.Float) {
+        return op;
+      } else {
+        return functionBuilder.sub({ tag: "CInt", bits: 32, value: 0 }, op);
+      }
+    } else { //e.op === TST.UnaryOp.UnaryNot
       return op;
     }
   } else {

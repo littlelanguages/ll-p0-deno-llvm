@@ -235,6 +235,27 @@ export type CZext = {
   type: Type;
 };
 
+const operandToUntypedString = (op: Operand): string =>
+  op.tag === "CInt"
+    ? `${op.value}`
+    : op.tag === "CArray"
+    ? `[${op.values.map(operandToString).join(", ")}]`
+    : op.tag === "CGetElementPtr"
+    ? `getelementptr${op.inBounds ? " inbounds" : ""}(${
+      typeToString(op.elementType)
+    }, ${operandToString(op.address)}${
+      op.indices.map((i) => `, ${operandToString(i)}`).join("")
+    })`
+    : op.tag === "CGlobalReference"
+    ? `${op.name}`
+    : op.tag === "Czext"
+    ? `zext (${operandToString(op.operand)} to ${typeToString(op.type)})`
+    : op.tag === "LocalReference"
+    ? `${typeToString(op.type)} ${op.name}`
+    : (function () {
+      throw new Error(`TODO: operandToString: ${op.tag}`);
+    })();
+
 const operandToString = (op: Operand): string =>
   op.tag === "CInt"
     ? `i${op.bits} ${op.value}`
@@ -247,18 +268,18 @@ const operandToString = (op: Operand): string =>
       op.indices.map((i) => `, ${operandToString(i)}`).join("")
     })`
     : op.tag === "CGlobalReference"
-    ? `${typeToString(op.type)} @${op.name}`
+    ? `${typeToString(op.type)} ${op.name}`
     : op.tag === "Czext"
     ? `${typeToString(op.type)} zext (${operandToString(op.operand)} to ${
       typeToString(op.type)
     })`
     : op.tag === "LocalReference"
-    ? `${typeToString(op.type)} @${op.name}`
+    ? `${typeToString(op.type)} ${op.name}`
     : (function () {
       throw new Error(`TODO: operandToString: ${op.tag}`);
     })();
 
-export type Instruction = Icall | ILabel | IRet;
+export type Instruction = Icall | ILabel | IRet | ISub;
 
 export type Icall = {
   tag: "Icall";
@@ -276,39 +297,50 @@ export type IRet = {
   c: Constant;
 };
 
+export type ISub = {
+  tag: "ISub";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
+
 export const write = (
   module: Module,
   w: TextWriter,
 ): Promise<any> => {
   const writeExternalDeclararion = (d: ExternalDeclaration): Promise<any> =>
     w.write(
-      `\ndeclare external ccc ${typeToString(d.result)} @${d.name}(${
+      `\ndeclare external ccc ${typeToString(d.result)} ${d.name}(${
         d.arguments.map(typeToString).join(", ")
       })\n`,
     );
 
   const writeGlobalDeclaration = (d: GlobalDeclaration): Promise<any> =>
     w.write(
-      `\n@${d.name} = unnamed_addr constant ${typeToString(d.type)} ${
+      `\n${d.name} = unnamed_addr constant ${typeToString(d.type)} ${
         operandToString(d.value)
       }\n`,
     );
 
   const writeFunctionDeclaration = (d: FunctionDeclaration): Promise<any> => {
     const header = w.write(
-      `\ndefine external ccc ${typeToString(d.result)} @${d.name}(${
-        d.arguments.map(([n, t]) => `${typeToString(t)} %${n}}`).join(", ")
+      `\ndefine external ccc ${typeToString(d.result)} ${d.name}(${
+        d.arguments.map(([n, t]) => `${typeToString(t)} ${n}}`).join(", ")
       }) {\n`,
     );
 
     return d.body.reduce((a, s) => {
-      const line = (s.tag === "Icall")
-        ? `  call ccc void @${s.name}(${
+      const line = s.tag === "Icall"
+        ? `  call ccc void ${s.name}(${
           s.arguments.map(operandToString).join(", ")
         })\n`
-        : (s.tag === "ILabel")
+        : s.tag === "ILabel"
         ? `${s.name}:\n`
-        : `  ret ${operandToString(s.c)}\n`;
+        : s.tag === "IRet"
+        ? `  ret ${operandToString(s.c)}\n`
+        : `  ${s.result} = sub ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`;
 
       return a.then(() => w.write(line));
     }, header).then(() => w.write("}"));
