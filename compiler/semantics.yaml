@@ -68,38 +68,38 @@
                 }
               output: |
                 was false
-#       - scenario:
-#           name: Binary Expression
-#           tests:
-#             - scenario:
-#                 name: Boolean operators
-#                 tests:
-#                   - name: "&&"
-#                     input: |
-#                       fun main() {
-#                         println(true && true);
-#                         println(true && false);
-#                         println(false && true);
-#                         println(false && false);
-#                       }
-#                     output: |
-#                       true
-#                       false
-#                       false
-#                       false
-#                   - name: "||"
-#                     input: |
-#                       fun main() {
-#                         println(true || true);
-#                         println(true || false);
-#                         println(false || true);
-#                         println(false || false);
-#                       }
-#                     output: |
-#                       true
-#                       true
-#                       true
-#                       false
+      - scenario:
+          name: Binary Expression
+          tests:
+            - scenario:
+                name: Boolean operators
+                tests:
+                  - name: "&&"
+                    input: |
+                      fun main() {
+                        println(true && true);
+                        println(true && false);
+                        println(false && true);
+                        println(false && false);
+                      }
+                    output: |
+                      true
+                      false
+                      false
+                      false
+                  - name: "||"
+                    input: |
+                      fun main() {
+                        println(true || true);
+                        println(true || false);
+                        println(false || true);
+                        println(false || false);
+                      }
+                    output: |
+                      true
+                      true
+                      true
+                      false
 #             - scenario:
 #                 name: Equality operators
 #                 tests:

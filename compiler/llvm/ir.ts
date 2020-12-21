@@ -309,15 +309,25 @@ const floatToString = (v: number): string => {
 };
 
 export type Instruction =
+  | IAnd
   | IBr
   | ICall
   | ICondBr
   | IFSub
   | IGetElementPointer
   | ILabel
+  | IOr
   | IPhi
   | IRet
-  | ISub;
+  | ISub
+  | IZext;
+
+export type IAnd = {
+  tag: "IAnd";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
 
 export type IBr = {
   tag: "IBr";
@@ -359,6 +369,13 @@ export type ILabel = {
   name: string;
 };
 
+export type IOr = {
+  tag: "IOr";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
+
 export type IPhi = {
   tag: "IPhi";
   result: string;
@@ -375,6 +392,13 @@ export type ISub = {
   result: string;
   operand0: Operand;
   operand1: Operand;
+};
+
+export type IZext = {
+  tag: "IZext";
+  result: string;
+  type: Type;
+  operand: Operand;
 };
 
 export const write = (
@@ -403,7 +427,11 @@ export const write = (
     );
 
     return d.body.reduce((a, s) => {
-      const line = s.tag === "IBr"
+      const line = s.tag === "IAnd"
+        ? `  ${s.result} = and ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
+        : s.tag === "IBr"
         ? `  br label %${s.label}\n`
         : s.tag === "ICall"
         ? `  call ccc void ${s.name}(${
@@ -425,6 +453,10 @@ export const write = (
         }\n`
         : s.tag === "ILabel"
         ? `${s.name}:\n`
+        : s.tag === "IOr"
+        ? `  ${s.result} = or ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
         : s.tag === "IPhi"
         ? `  ${s.result} = phi ${typeToString(typeOf(s.incoming[0][0]))} ${
           s.incoming.map(([o, l]) => `[${operandToUntypedString(o)}, %${l}]`)
@@ -432,9 +464,13 @@ export const write = (
         }\n`
         : s.tag === "IRet"
         ? `  ret ${operandToString(s.c)}\n`
-        : `  ${s.result} = sub ${operandToString(s.operand0)}, ${
+        : s.tag === "ISub"
+        ? `  ${s.result} = sub ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
-        }\n`;
+        }\n`
+        : /* s.tag === "IZext" */ `  ${s.result} = zext ${
+          operandToString(s.operand)
+        } to ${typeToString(s.type)}\n`;
 
       return a.then(() => w.write(line));
     }, header).then(() => w.write("}"));

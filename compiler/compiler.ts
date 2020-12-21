@@ -63,7 +63,7 @@ const compilePrintStatement = (
     const et = typeOf(e);
     let eo = compileE(e, functionBuilder);
     if (et === TST.Type.Bool) {
-      eo = { tag: "Czext", operand: eo, type: IR.i8 };
+      eo = functionBuilder.zext(IR.i8, eo);
     }
     const name = et ===
         TST.Type.Bool
@@ -163,6 +163,17 @@ const compileE = (
 
     functionBuilder.label(mergeBlock);
     return functionBuilder.phi([[e2, thenBlock], [e3, elseBlock]]);
+  } else if (e.tag === "BinaryExpression") {
+    const e1 = compileE(e.e1, functionBuilder);
+    const e2 = compileE(e.e2, functionBuilder);
+
+    if (e.op === TST.BinaryOp.And) {
+      return functionBuilder.and(e1, e2);
+    } else if (e.op === TST.BinaryOp.Or) {
+      return functionBuilder.or(e1, e2);
+    } else {
+      throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
+    }
   } else {
     throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   }

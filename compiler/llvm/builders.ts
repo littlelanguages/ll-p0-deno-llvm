@@ -71,6 +71,7 @@ export const module = (id: string): ModuleBuilder => ({
 export interface FunctionBuilder {
   instructions: Array<IR.Instruction>;
 
+  and(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   br(label: string): void;
   call(name: string, params: Array<IR.Operand>): void;
   condBr(condition: IR.Operand, trueLabel: string, falseLabel: string): void;
@@ -83,9 +84,11 @@ export interface FunctionBuilder {
     indices: Array<IR.Constant>,
   ): IR.Operand;
   label(name: string): void;
+  or(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   phi(incoming: Array<[op: IR.Operand, label: string]>): IR.Operand;
   ret(c: IR.Constant): void;
   sub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
+  zext(type: IR.Type, operand: IR.Operand): IR.Operand;
 
   newLabel(prefix: string): string;
   declareGlobal(name: string, type: IR.Type, value: IR.Constant): void;
@@ -113,6 +116,18 @@ const functionBuilder = (
     const result = `%${this.registerCount}`;
     this.registerCount += 1;
     return result;
+  },
+
+  and: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push({ tag: "IAnd", result, operand0, operand1 });
+
+    return {
+      tag: "LocalReference",
+      type: IR.i1,
+      name: result,
+    };
   },
 
   br: function (label: string) {
@@ -163,6 +178,18 @@ const functionBuilder = (
     this.instructions.push({ tag: "ILabel", name });
   },
 
+  or: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push({ tag: "IOr", result, operand0, operand1 });
+
+    return {
+      tag: "LocalReference",
+      type: IR.i1,
+      name: result,
+    };
+  },
+
   phi: function (
     incoming: Array<[op: IR.Operand, label: string]>,
   ): IR.Operand {
@@ -186,6 +213,13 @@ const functionBuilder = (
     this.registerCount += 1;
     this.instructions.push({ tag: "ISub", result, operand0, operand1 });
     return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
+  },
+
+  zext: function (type: IR.Type, operand: IR.Operand): IR.Operand {
+    const result = `%${this.registerCount}`;
+    this.registerCount += 1;
+    this.instructions.push({ tag: "IZext", type, result, operand });
+    return { tag: "LocalReference", type, name: result };
   },
 
   declareGlobal: (
