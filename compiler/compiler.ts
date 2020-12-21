@@ -129,6 +129,8 @@ const compileE = (
     } else {
       return op;
     }
+  } else if (e.tag === "LiteralFloat") {
+    return { tag: "CFloatFP", value: e.v };
   } else if (e.tag === "UnaryExpression") {
     const op = compileE(e.e, functionBuilder);
 
@@ -136,7 +138,7 @@ const compileE = (
       return op;
     } else if (e.op === TST.UnaryOp.UnaryMinus) {
       if (typeOf(e.e) === TST.Type.Float) {
-        return op;
+        return functionBuilder.fsub({ tag: "CFloatFP", value: 0.0 }, op);
       } else {
         return functionBuilder.sub({ tag: "CInt", bits: 32, value: 0 }, op);
       }

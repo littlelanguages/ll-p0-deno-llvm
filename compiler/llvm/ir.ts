@@ -1,3 +1,5 @@
+import * as IEEE754 from "https://deno.land/x/ieee754@v0.1.0/mod.ts";
+
 export type Module = {
   tag: "Module";
   id: string;
@@ -175,7 +177,8 @@ export type LocalReference = {
 
 export type Constant =
   | CInt
-  | CFloatSingle
+  | CHalfFP
+  | CFloatFP
   | CArray
   | CAdd
   | CFAdd
@@ -189,8 +192,13 @@ export type CInt = {
   value: number;
 };
 
-export type CFloatSingle = {
-  tag: "CFloatSingle";
+export type CHalfFP = {
+  tag: "CHalfFP";
+  value: number;
+};
+
+export type CFloatFP = {
+  tag: "CFloatFP";
   value: number;
 };
 
@@ -238,6 +246,8 @@ export type CZext = {
 const operandToUntypedString = (op: Operand): string =>
   op.tag === "CInt"
     ? `${op.value}`
+    : op.tag === "CFloatFP"
+    ? `${op.value}.0`
     : op.tag === "CArray"
     ? `[${op.values.map(operandToString).join(", ")}]`
     : op.tag === "CGetElementPtr"
@@ -259,6 +269,8 @@ const operandToUntypedString = (op: Operand): string =>
 const operandToString = (op: Operand): string =>
   op.tag === "CInt"
     ? `i${op.bits} ${op.value}`
+    : op.tag === "CFloatFP"
+    ? `float ${op.value}.0`
     : op.tag === "CArray"
     ? `[${op.values.map(operandToString).join(", ")}]`
     : op.tag === "CGetElementPtr"
@@ -279,12 +291,19 @@ const operandToString = (op: Operand): string =>
       throw new Error(`TODO: operandToString: ${op.tag}`);
     })();
 
-export type Instruction = Icall | ILabel | IRet | ISub;
+export type Instruction = Icall | IFSub | ILabel | IRet | ISub;
 
 export type Icall = {
   tag: "Icall";
   name: string;
   arguments: Array<Operand>;
+};
+
+export type IFSub = {
+  tag: "IFSub";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
 };
 
 export type ILabel = {
@@ -334,6 +353,10 @@ export const write = (
         ? `  call ccc void ${s.name}(${
           s.arguments.map(operandToString).join(", ")
         })\n`
+        : s.tag === "IFSub"
+        ? `  ${s.result} = fsub ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
         : s.tag === "ILabel"
         ? `${s.name}:\n`
         : s.tag === "IRet"

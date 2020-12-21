@@ -72,6 +72,7 @@ export interface FunctionBuilder {
   instructions: Array<IR.Instruction>;
 
   call(name: string, params: Array<IR.Operand>): void;
+  fsub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   label(name: string): void;
   ret(c: IR.Constant): void;
   sub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
@@ -99,6 +100,13 @@ const functionBuilder = (
 
   call: function (name: string, args: Array<IR.Operand>) {
     this.instructions.push({ tag: "Icall", name, arguments: args });
+  },
+
+  fsub: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
+    const result = `%${this.registerCount}`;
+    this.registerCount += 1;
+    this.instructions.push({ tag: "IFSub", result, operand0, operand1 });
+    return { tag: "LocalReference", type: typeOf(operand0), name: result };
   },
 
   label: function (name: string) {
@@ -144,7 +152,9 @@ const typeOf = (o: IR.Operand): IR.Type =>
     ? IR.pointerType(o.memberType)
     : o.tag === "CFAdd"
     ? typeOf(o.operand0)
-    : o.tag === "CFloatSingle"
+    : o.tag === "CHalfFP"
+    ? IR.halfFP
+    : o.tag === "CFloatFP"
     ? IR.floatFP
     : o.tag === "CGetElementPtr"
     ? o.type
