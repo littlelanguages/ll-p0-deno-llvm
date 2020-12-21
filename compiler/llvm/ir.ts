@@ -247,7 +247,7 @@ const operandToUntypedString = (op: Operand): string =>
   op.tag === "CInt"
     ? `${op.value}`
     : op.tag === "CFloatFP"
-    ? `${op.value}.0`
+    ? floatToString(op.value)
     : op.tag === "CArray"
     ? `[${op.values.map(operandToString).join(", ")}]`
     : op.tag === "CGetElementPtr"
@@ -270,7 +270,7 @@ const operandToString = (op: Operand): string =>
   op.tag === "CInt"
     ? `i${op.bits} ${op.value}`
     : op.tag === "CFloatFP"
-    ? `float ${op.value}.0`
+    ? `float ${floatToString(op.value)}`
     : op.tag === "CArray"
     ? `[${op.values.map(operandToString).join(", ")}]`
     : op.tag === "CGetElementPtr"
@@ -290,6 +290,23 @@ const operandToString = (op: Operand): string =>
     : (function () {
       throw new Error(`TODO: operandToString: ${op.tag}`);
     })();
+
+const floatToString = (v: number): string => {
+  const buffer = new Uint8Array(8);
+
+  IEEE754.write(buffer, v, 0, false, 52, 8);
+
+  let result = ["0x"];
+  buffer.forEach((b) => {
+    const by = b.toString(16);
+    if (b < 17) {
+      result.push("0");
+    }
+    result.push(by);
+  });
+
+  return result.join("");
+};
 
 export type Instruction = Icall | IFSub | ILabel | IRet | ISub;
 
