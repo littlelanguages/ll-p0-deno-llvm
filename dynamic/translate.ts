@@ -652,34 +652,45 @@ const p = (p: AST.Program): Either<Errors, Program> => {
 
         return { tag: "BinaryExpression", op: opp, e1: e1p, e2: e2p };
       } else if (e.tag === "UnaryExpression") {
-        const opp = this.uo(e.op);
-        const ep = this.e(e.expression, sigma);
-        const ept = typeOf(ep);
-
-        if (opp === UnaryOp.UnaryNot) {
-          if (ept !== Type.Bool && ept !== Type.TError) {
-            this.reportError(
-              {
-                tag: "UnaryExpressionRequiresOperandTypeError",
-                op: opp,
-                type: ept,
-                location: locationOf(e.expression),
-              },
-            );
-          }
+        if (e.op === UnaryOp.UnaryMinus && e.expression.tag === "LiteralInt") {
+          return this.le(
+            {
+              tag: "LiteralExpressionUnaryValue",
+              location: e.location,
+              op: AST.UnaryOp.UnaryMinus,
+              value: e.expression,
+            },
+          );
         } else {
-          if (ept !== Type.Int && ept !== Type.Float && ept !== Type.TError) {
-            this.reportError(
-              {
-                tag: "UnaryExpressionRequiresOperandTypeError",
-                op: opp,
-                type: ept,
-                location: locationOf(e.expression),
-              },
-            );
+          const opp = this.uo(e.op);
+          const ep = this.e(e.expression, sigma);
+          const ept = typeOf(ep);
+
+          if (opp === UnaryOp.UnaryNot) {
+            if (ept !== Type.Bool && ept !== Type.TError) {
+              this.reportError(
+                {
+                  tag: "UnaryExpressionRequiresOperandTypeError",
+                  op: opp,
+                  type: ept,
+                  location: locationOf(e.expression),
+                },
+              );
+            }
+          } else {
+            if (ept !== Type.Int && ept !== Type.Float && ept !== Type.TError) {
+              this.reportError(
+                {
+                  tag: "UnaryExpressionRequiresOperandTypeError",
+                  op: opp,
+                  type: ept,
+                  location: locationOf(e.expression),
+                },
+              );
+            }
           }
+          return { tag: "UnaryExpression", op: opp, e: ep };
         }
-        return { tag: "UnaryExpression", op: opp, e: ep };
       } else if (e.tag === "CallExpression") {
         const binding = sigma.get(e.identifier.name);
 

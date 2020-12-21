@@ -38,7 +38,10 @@ const runTestItem = (testItem: TestItem, index: number): Promise<void> => {
 
   return translate(testItem.input)
     .either(
-      (e) => Promise.reject(e),
+      (e) => {
+        console.log(`>>>>>>>>>>>>>> ${JSON.stringify(e, null, 2)}`);
+        return Promise.reject(e);
+      },
       (tst) => {
         try {
           return Tools.write(compile(tst, testItem.name), `./tests/${name}.ll`);
@@ -58,20 +61,9 @@ const runTestItem = (testItem: TestItem, index: number): Promise<void> => {
       )
     )
     .then(() => run(Tools.run(`./tests/${name}.bc`, [])))
-    .then((result) => assertEquals(result.output.trim(), testItem.output.trim()) // ? Promise.resolve()
-      // : Promise.reject(
-      //   testItem.name + ": [" + result.output.trim() +
-      //     "] " +
-      //     testItem.output.trim() + "]",
-      // )
-    )
-    // .catch((r) => {
-    // console.log(
-    //   `***************** ${testItem.name} ${JSON.stringify(r, null, 2)}`,
-    // );
-    // return fail(JSON.stringify(testItem, null, 2));
-    // })
-    .then((_) => Promise.resolve());
+    .then((result) =>
+      assertEquals(result.output.trim(), testItem.output.trim())
+    );
 };
 
 const runTests = (): Promise<any> =>
