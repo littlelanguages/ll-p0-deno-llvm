@@ -171,9 +171,32 @@ const compileE = (
       return functionBuilder.and(e1, e2);
     } else if (e.op === TST.BinaryOp.Or) {
       return functionBuilder.or(e1, e2);
-    } else {
-      throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
+    } else if (e.op === TST.BinaryOp.Equal) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fcmp(IR.FP.OEQ, e1, e2)
+        : functionBuilder.icmp(IR.IP.EQ, e1, e2);
+    } else if (e.op === TST.BinaryOp.NotEqual) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fcmp(IR.FP.ONE, e1, e2)
+        : functionBuilder.icmp(IR.IP.NQ, e1, e2);
+    } else if (e.op === TST.BinaryOp.LessThan) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fcmp(IR.FP.OLT, e1, e2)
+        : functionBuilder.icmp(IR.IP.SLT, e1, e2);
+    } else if (e.op === TST.BinaryOp.LessEqual) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fcmp(IR.FP.OLE, e1, e2)
+        : functionBuilder.icmp(IR.IP.SLE, e1, e2);
+    } else if (e.op === TST.BinaryOp.GreaterThan) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fcmp(IR.FP.OGT, e1, e2)
+        : functionBuilder.icmp(IR.IP.SGT, e1, e2);
+    } else if (e.op === TST.BinaryOp.GreaterEqual) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fcmp(IR.FP.OGE, e1, e2)
+        : functionBuilder.icmp(IR.IP.SGE, e1, e2);
     }
+    throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   } else {
     throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   }

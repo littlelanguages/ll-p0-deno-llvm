@@ -308,13 +308,47 @@ const floatToString = (v: number): string => {
   return result.join("");
 };
 
+export enum IP {
+  EQ = "eq",
+  NQ = "ne",
+  UGT = "ugt",
+  UGE = "uge",
+  ULT = "ult",
+  ULE = "ule",
+  SGT = "sgt",
+  SGE = "sge",
+  SLT = "slt",
+  SLE = "sle",
+}
+
+export enum FP {
+  FALSE = "false",
+  OEQ = "oeq",
+  OGT = "ogt",
+  OGE = "oge",
+  OLT = "olt",
+  OLE = "ole",
+  ONE = "one",
+  ORD = "ord",
+  UEQ = "ueq",
+  UGT = "ugt",
+  UGE = "uge",
+  ULT = "ult",
+  ULE = "ule",
+  UNE = "une",
+  UNO = "uno",
+  TRUE = "true",
+}
+
 export type Instruction =
   | IAnd
   | IBr
   | ICall
   | ICondBr
+  | IFCmp
   | IFSub
   | IGetElementPointer
+  | IICmp
   | ILabel
   | IOr
   | IPhi
@@ -347,6 +381,14 @@ export type ICondBr = {
   falseLabel: string;
 };
 
+export type IFCmp = {
+  tag: "IFCmp";
+  result: string;
+  op: FP;
+  operand0: Operand;
+  operand1: Operand;
+};
+
 export type IFSub = {
   tag: "IFSub";
   result: string;
@@ -362,6 +404,14 @@ export type IGetElementPointer = {
   elementType: Type;
   address: Operand;
   indices: Array<Constant>;
+};
+
+export type IICmp = {
+  tag: "IICmp";
+  result: string;
+  op: IP;
+  operand0: Operand;
+  operand1: Operand;
 };
 
 export type ILabel = {
@@ -441,6 +491,10 @@ export const write = (
         ? `  br ${
           operandToString(s.condition)
         }, label %${s.trueLabel}, label %${s.falseLabel}\n`
+        : s.tag === "IFCmp"
+        ? `  ${s.result} = fcmp ${s.op} ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
         : s.tag === "IFSub"
         ? `  ${s.result} = fsub ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
@@ -450,6 +504,10 @@ export const write = (
           typeToString(s.elementType)
         }, ${operandToString(s.address)}${
           s.indices.map((i) => `, ${operandToString(i)}`).join("")
+        }\n`
+        : s.tag === "IICmp"
+        ? `  ${s.result} = icmp ${s.op} ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
         }\n`
         : s.tag === "ILabel"
         ? `${s.name}:\n`

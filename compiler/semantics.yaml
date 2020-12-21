@@ -100,114 +100,114 @@
                       true
                       true
                       false
-#             - scenario:
-#                 name: Equality operators
-#                 tests:
-#                   - name: "=="
-#                     input: |
-#                       fun main() {
-#                         println(true == true);
-#                         println(true == false);
-#                         println(1 == 1);
-#                         println(1 == 2);
-#                         println(1.0 == 1.0);
-#                         println(1.0 == 2.0);
-#                       }
-#                     output: |
-#                       true
-#                       false
-#                       true
-#                       false
-#                       true
-#                       false
-#                   - name: "!="
-#                     input: |
-#                       fun main() {
-#                         println(true != true);
-#                         println(true != false);
-#                         println(1 != 1);
-#                         println(1 != 2);
-#                         println(1.0 != 1.0);
-#                         println(1.0 != 2.0);
-#                       }
-#                     output: |
-#                       false
-#                       true
-#                       false
-#                       true
-#                       false
-#                       true
-#             - scenario:
-#                 name: Relational operators
-#                 tests:
-#                   - name: "<"
-#                     input: |
-#                       fun main() {
-#                         println(1 < 1);
-#                         println(0 < 1);
-#                         println(2 < 1);
-#                         println(1.0 < 1.0);
-#                         println(0.0 < 1.0);
-#                         println(2.0 < 1.0);
-#                       }
-#                     output: |
-#                       false
-#                       true
-#                       false
-#                       false
-#                       true
-#                       false
-#                   - name: "<="
-#                     input: |
-#                       fun main() {
-#                         println(1 <= 1);
-#                         println(0 <= 1);
-#                         println(2 <= 1);
-#                         println(1.0 <= 1.0);
-#                         println(0.0 <= 1.0);
-#                         println(2.0 <= 1.0);
-#                       }
-#                     output: |
-#                       true
-#                       true
-#                       false
-#                       true
-#                       true
-#                       false
-#                   - name: ">"
-#                     input: |
-#                       fun main() {
-#                         println(1 > 1);
-#                         println(0 > 1);
-#                         println(2 > 1);
-#                         println(1.0 > 1.0);
-#                         println(0.0 > 1.0);
-#                         println(2.0 > 1.0);
-#                       }
-#                     output: |
-#                       false
-#                       false
-#                       true
-#                       false
-#                       false
-#                       true
-#                   - name: ">="
-#                     input: |
-#                       fun main() {
-#                         println(1 >= 1);
-#                         println(0 >= 1);
-#                         println(2 >= 1);
-#                         println(1.0 >= 1.0);
-#                         println(0.0 >= 1.0);
-#                         println(2.0 >= 1.0);
-#                       }
-#                     output: |
-#                       true
-#                       false
-#                       true
-#                       true
-#                       false
-#                       true
+            - scenario:
+                name: Equality operators
+                tests:
+                  - name: "=="
+                    input: |
+                      fun main() {
+                        println(true == true);
+                        println(true == false);
+                        println(1 == 1);
+                        println(1 == 2);
+                        println(1.0 == 1.0);
+                        println(1.0 == 2.0);
+                      }
+                    output: |
+                      true
+                      false
+                      true
+                      false
+                      true
+                      false
+                  - name: "!="
+                    input: |
+                      fun main() {
+                        println(true != true);
+                        println(true != false);
+                        println(1 != 1);
+                        println(1 != 2);
+                        println(1.0 != 1.0);
+                        println(1.0 != 2.0);
+                      }
+                    output: |
+                      false
+                      true
+                      false
+                      true
+                      false
+                      true
+            - scenario:
+                name: Relational operators
+                tests:
+                  - name: "<"
+                    input: |
+                      fun main() {
+                        println(1 < 1);
+                        println(0 < 1);
+                        println(2 < 1);
+                        println(1.0 < 1.0);
+                        println(0.0 < 1.0);
+                        println(2.0 < 1.0);
+                      }
+                    output: |
+                      false
+                      true
+                      false
+                      false
+                      true
+                      false
+                  - name: "<="
+                    input: |
+                      fun main() {
+                        println(1 <= 1);
+                        println(0 <= 1);
+                        println(2 <= 1);
+                        println(1.0 <= 1.0);
+                        println(0.0 <= 1.0);
+                        println(2.0 <= 1.0);
+                      }
+                    output: |
+                      true
+                      true
+                      false
+                      true
+                      true
+                      false
+                  - name: ">"
+                    input: |
+                      fun main() {
+                        println(1 > 1);
+                        println(0 > 1);
+                        println(2 > 1);
+                        println(1.0 > 1.0);
+                        println(0.0 > 1.0);
+                        println(2.0 > 1.0);
+                      }
+                    output: |
+                      false
+                      false
+                      true
+                      false
+                      false
+                      true
+                  - name: ">="
+                    input: |
+                      fun main() {
+                        println(1 >= 1);
+                        println(0 >= 1);
+                        println(2 >= 1);
+                        println(1.0 >= 1.0);
+                        println(0.0 >= 1.0);
+                        println(2.0 >= 1.0);
+                      }
+                    output: |
+                      true
+                      false
+                      true
+                      true
+                      false
+                      true
 #             - scenario:
 #                 name: Arithmetic operators
 #                 tests:

@@ -75,6 +75,7 @@ export interface FunctionBuilder {
   br(label: string): void;
   call(name: string, params: Array<IR.Operand>): void;
   condBr(condition: IR.Operand, trueLabel: string, falseLabel: string): void;
+  fcmp(op: IR.FP, operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   fsub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   getElementPointer(
     inBounds: boolean,
@@ -83,6 +84,7 @@ export interface FunctionBuilder {
     address: IR.Operand,
     indices: Array<IR.Constant>,
   ): IR.Operand;
+  icmp(op: IR.IP, operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   label(name: string): void;
   or(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   phi(incoming: Array<[op: IR.Operand, label: string]>): IR.Operand;
@@ -144,6 +146,22 @@ const functionBuilder = (
     );
   },
 
+  fcmp: function (
+    op: IR.FP,
+    operand0: IR.Operand,
+    operand1: IR.Operand,
+  ): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push({ tag: "IFCmp", result, op, operand0, operand1 });
+
+    return {
+      tag: "LocalReference",
+      type: IR.i1,
+      name: result,
+    };
+  },
+
   fsub: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
     const result = `%${this.registerCount}`;
     this.registerCount += 1;
@@ -172,6 +190,22 @@ const functionBuilder = (
     );
 
     return { tag: "LocalReference", type, name: result };
+  },
+
+  icmp: function (
+    op: IR.IP,
+    operand0: IR.Operand,
+    operand1: IR.Operand,
+  ): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push({ tag: "IICmp", result, op, operand0, operand1 });
+
+    return {
+      tag: "LocalReference",
+      type: IR.i1,
+      name: result,
+    };
   },
 
   label: function (name: string) {
