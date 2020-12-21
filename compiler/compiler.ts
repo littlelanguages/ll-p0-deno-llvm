@@ -87,7 +87,7 @@ const compileE = (
   } else if (e.tag === "LiteralBool") {
     return { tag: "CInt", bits: 1, value: e.v ? 1 : 0 };
   } else if (e.tag === "LiteralString") {
-    const op = functionBuilder.strings.get(e.v);
+    let op = functionBuilder.strings.get(e.v);
 
     if (op === undefined) {
       const name = `@_${functionBuilder.strings.size}.str`;
@@ -107,28 +107,27 @@ const compileE = (
           })),
         },
       );
-
-      const opp: IR.CGetElementPtr = {
-        tag: "CGetElementPtr",
-        inBounds: true,
-        type: IR.pointerType(IR.i8),
-        elementType: IR.arrayType(e.v.length + 1, IR.i8),
-        address: {
-          tag: "CGlobalReference",
-          type: IR.pointerType(IR.arrayType(e.v.length + 1, IR.i8)),
-          name: name,
-        },
-        indices: [
-          { tag: "CInt", bits: 32, value: 0 },
-          { tag: "CInt", bits: 32, value: 0 },
-        ],
+      op = {
+        tag: "CGlobalReference",
+        type: IR.pointerType(IR.arrayType(e.v.length + 1, IR.i8)),
+        name: name,
       };
 
-      functionBuilder.strings.set(name, opp);
-      return opp;
-    } else {
-      return op;
+      functionBuilder.strings.set(name, op);
     }
+
+    const opp = functionBuilder.getElementPointer(
+      true,
+      IR.pointerType(IR.i8),
+      IR.arrayType(e.v.length + 1, IR.i8),
+      op,
+      [
+        { tag: "CInt", bits: 32, value: 0 },
+        { tag: "CInt", bits: 32, value: 0 },
+      ],
+    );
+
+    return opp;
   } else if (e.tag === "LiteralFloat") {
     return { tag: "CFloatFP", value: e.v };
   } else if (e.tag === "UnaryExpression") {
@@ -145,6 +144,25 @@ const compileE = (
     } else { //e.op === TST.UnaryOp.UnaryNot
       return op;
     }
+  } else if (e.tag === "TernaryExpression") {
+    const thenBlock = functionBuilder.newLabel("then");
+    const elseBlock = functionBuilder.newLabel("else");
+    const mergeBlock = functionBuilder.newLabel("merge");
+
+    const e1 = compileE(e.e1, functionBuilder);
+
+    functionBuilder.condBr(e1, thenBlock, elseBlock);
+
+    functionBuilder.label(thenBlock);
+    const e2 = compileE(e.e2, functionBuilder);
+    functionBuilder.br(mergeBlock);
+
+    functionBuilder.label(elseBlock);
+    const e3 = compileE(e.e3, functionBuilder);
+    functionBuilder.br(mergeBlock);
+
+    functionBuilder.label(mergeBlock);
+    return functionBuilder.phi([[e2, thenBlock], [e3, elseBlock]]);
   } else {
     throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   }

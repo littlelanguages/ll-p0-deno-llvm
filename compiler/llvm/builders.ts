@@ -71,12 +71,23 @@ export const module = (id: string): ModuleBuilder => ({
 export interface FunctionBuilder {
   instructions: Array<IR.Instruction>;
 
+  br(label: string): void;
   call(name: string, params: Array<IR.Operand>): void;
+  condBr(condition: IR.Operand, trueLabel: string, falseLabel: string): void;
   fsub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
+  getElementPointer(
+    inBounds: boolean,
+    type: IR.Type,
+    elementType: IR.Type,
+    address: IR.Operand,
+    indices: Array<IR.Constant>,
+  ): IR.Operand;
   label(name: string): void;
+  phi(incoming: Array<[op: IR.Operand, label: string]>): IR.Operand;
   ret(c: IR.Constant): void;
   sub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
 
+  newLabel(prefix: string): string;
   declareGlobal(name: string, type: IR.Type, value: IR.Constant): void;
 
   build(): void;
@@ -98,19 +109,72 @@ const functionBuilder = (
     return label;
   },
 
+  newRegister: function (): string {
+    const result = `%${this.registerCount}`;
+    this.registerCount += 1;
+    return result;
+  },
+
+  br: function (label: string) {
+    this.instructions.push({ tag: "IBr", label });
+  },
+
   call: function (name: string, args: Array<IR.Operand>) {
     this.instructions.push({ tag: "Icall", name, arguments: args });
+  },
+
+  condBr(condition: IR.Operand, trueLabel: string, falseLabel: string) {
+    this.instructions.push(
+      { tag: "ICondBr", condition, trueLabel, falseLabel },
+    );
   },
 
   fsub: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
     const result = `%${this.registerCount}`;
     this.registerCount += 1;
     this.instructions.push({ tag: "IFSub", result, operand0, operand1 });
-    return { tag: "LocalReference", type: typeOf(operand0), name: result };
+    return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
+  },
+
+  getElementPointer: function (
+    inBounds: boolean,
+    type: IR.Type,
+    elementType: IR.Type,
+    address: IR.Operand,
+    indices: Array<IR.Constant>,
+  ): IR.Operand {
+    const result = this.newRegister();
+    this.instructions.push(
+      {
+        tag: "IGetElementPointer",
+        result,
+        inBounds,
+        type,
+        elementType,
+        address,
+        indices,
+      },
+    );
+
+    return { tag: "LocalReference", type, name: result };
   },
 
   label: function (name: string) {
     this.instructions.push({ tag: "ILabel", name });
+  },
+
+  phi: function (
+    incoming: Array<[op: IR.Operand, label: string]>,
+  ): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push({ tag: "IPhi", result, incoming });
+
+    return {
+      tag: "LocalReference",
+      type: IR.typeOf(incoming[0][0]),
+      name: result,
+    };
   },
 
   ret: function (c: IR.Constant) {
@@ -121,7 +185,7 @@ const functionBuilder = (
     const result = `%${this.registerCount}`;
     this.registerCount += 1;
     this.instructions.push({ tag: "ISub", result, operand0, operand1 });
-    return { tag: "LocalReference", type: typeOf(operand0), name: result };
+    return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
   },
 
   declareGlobal: (
@@ -144,26 +208,3 @@ const functionBuilder = (
 const initialInstructions = (): Array<
   IR.Instruction
 > => [{ tag: "ILabel", name: "entry_0" }];
-
-const typeOf = (o: IR.Operand): IR.Type =>
-  o.tag === "CAdd"
-    ? typeOf(o.operand0)
-    : o.tag === "CArray"
-    ? IR.pointerType(o.memberType)
-    : o.tag === "CFAdd"
-    ? typeOf(o.operand0)
-    : o.tag === "CHalfFP"
-    ? IR.halfFP
-    : o.tag === "CFloatFP"
-    ? IR.floatFP
-    : o.tag === "CGetElementPtr"
-    ? o.type
-    : o.tag === "CGlobalReference"
-    ? o.type
-    : o.tag === "CInt"
-    ? IR.integerType(o.bits)
-    : o.tag === "Czext"
-    ? o.type
-    : o.tag === "LocalReference"
-    ? o.type
-    : IR.i1;

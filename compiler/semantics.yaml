@@ -51,23 +51,23 @@
                 0.000000
                 1.000000
                 -1.000000
-#       - scenario:
-#           name: Ternary Expression
-#           tests:
-#             - name: true value
-#               input: |
-#                 fun main() {
-#                   println(true ? "was true" : "was false");
-#                 }
-#               output: |
-#                 was true
-#             - name: false value
-#               input: |
-#                 fun main() {
-#                   println(false ? "was true" : "was false");
-#                 }
-#               output: |
-#                 was false
+      - scenario:
+          name: Ternary Expression
+          tests:
+            - name: true value
+              input: |
+                fun main() {
+                  println(true ? "was true" : "was false");
+                }
+              output: |
+                was true
+            - name: false value
+              input: |
+                fun main() {
+                  println(false ? "was true" : "was false");
+                }
+              output: |
+                was false
 #       - scenario:
 #           name: Binary Expression
 #           tests:

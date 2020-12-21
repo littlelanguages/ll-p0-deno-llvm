@@ -261,7 +261,7 @@ const operandToUntypedString = (op: Operand): string =>
     : op.tag === "Czext"
     ? `zext (${operandToString(op.operand)} to ${typeToString(op.type)})`
     : op.tag === "LocalReference"
-    ? `${typeToString(op.type)} ${op.name}`
+    ? op.name
     : (function () {
       throw new Error(`TODO: operandToString: ${op.tag}`);
     })();
@@ -308,12 +308,33 @@ const floatToString = (v: number): string => {
   return result.join("");
 };
 
-export type Instruction = Icall | IFSub | ILabel | IRet | ISub;
+export type Instruction =
+  | IBr
+  | Icall
+  | ICondBr
+  | IFSub
+  | IGetElementPointer
+  | ILabel
+  | IPhi
+  | IRet
+  | ISub;
+
+export type IBr = {
+  tag: "IBr";
+  label: string;
+};
 
 export type Icall = {
   tag: "Icall";
   name: string;
   arguments: Array<Operand>;
+};
+
+export type ICondBr = {
+  tag: "ICondBr";
+  condition: Operand;
+  trueLabel: string;
+  falseLabel: string;
 };
 
 export type IFSub = {
@@ -323,9 +344,25 @@ export type IFSub = {
   operand1: Operand;
 };
 
+export type IGetElementPointer = {
+  tag: "IGetElementPointer";
+  result: string;
+  inBounds: boolean;
+  type: Type;
+  elementType: Type;
+  address: Operand;
+  indices: Array<Constant>;
+};
+
 export type ILabel = {
   tag: "ILabel";
   name: string;
+};
+
+export type IPhi = {
+  tag: "IPhi";
+  result: string;
+  incoming: Array<[Operand, string]>;
 };
 
 export type IRet = {
@@ -366,16 +403,33 @@ export const write = (
     );
 
     return d.body.reduce((a, s) => {
-      const line = s.tag === "Icall"
+      const line = s.tag === "IBr"
+        ? `  br label %${s.label}\n`
+        : s.tag === "Icall"
         ? `  call ccc void ${s.name}(${
           s.arguments.map(operandToString).join(", ")
         })\n`
+        : s.tag === "ICondBr"
+        ? `  br ${
+          operandToString(s.condition)
+        }, label %${s.trueLabel}, label %${s.falseLabel}\n`
         : s.tag === "IFSub"
         ? `  ${s.result} = fsub ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
         }\n`
+        : s.tag === "IGetElementPointer"
+        ? `  ${s.result} = getelementptr${s.inBounds ? " inbounds" : ""} ${
+          typeToString(s.elementType)
+        }, ${operandToString(s.address)}${
+          s.indices.map((i) => `, ${operandToString(i)}`).join("")
+        }\n`
         : s.tag === "ILabel"
         ? `${s.name}:\n`
+        : s.tag === "IPhi"
+        ? `  ${s.result} = phi ${typeToString(typeOf(s.incoming[0][0]))} ${
+          s.incoming.map(([o, l]) => `[${operandToUntypedString(o)}, %${l}]`)
+            .join(", ")
+        }\n`
         : s.tag === "IRet"
         ? `  ret ${operandToString(s.c)}\n`
         : `  ${s.result} = sub ${operandToString(s.operand0)}, ${
@@ -402,6 +456,29 @@ export const write = (
 
   return p4;
 };
+
+export const typeOf = (o: Operand): Type =>
+  o.tag === "CAdd"
+    ? typeOf(o.operand0)
+    : o.tag === "CArray"
+    ? pointerType(o.memberType)
+    : o.tag === "CFAdd"
+    ? typeOf(o.operand0)
+    : o.tag === "CHalfFP"
+    ? halfFP
+    : o.tag === "CFloatFP"
+    ? floatFP
+    : o.tag === "CGetElementPtr"
+    ? o.type
+    : o.tag === "CGlobalReference"
+    ? o.type
+    : o.tag === "CInt"
+    ? integerType(o.bits)
+    : o.tag === "Czext"
+    ? o.type
+    : o.tag === "LocalReference"
+    ? o.type
+    : i1;
 
 export interface TextWriter {
   write(text: string): Promise<number>;
