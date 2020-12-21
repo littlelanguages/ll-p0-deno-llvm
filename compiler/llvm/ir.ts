@@ -310,7 +310,7 @@ const floatToString = (v: number): string => {
 
 export type Instruction =
   | IBr
-  | Icall
+  | ICall
   | ICondBr
   | IFSub
   | IGetElementPointer
@@ -324,8 +324,8 @@ export type IBr = {
   label: string;
 };
 
-export type Icall = {
-  tag: "Icall";
+export type ICall = {
+  tag: "ICall";
   name: string;
   arguments: Array<Operand>;
 };
@@ -405,7 +405,7 @@ export const write = (
     return d.body.reduce((a, s) => {
       const line = s.tag === "IBr"
         ? `  br label %${s.label}\n`
-        : s.tag === "Icall"
+        : s.tag === "ICall"
         ? `  call ccc void ${s.name}(${
           s.arguments.map(operandToString).join(", ")
         })\n`

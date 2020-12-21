@@ -120,7 +120,7 @@ const functionBuilder = (
   },
 
   call: function (name: string, args: Array<IR.Operand>) {
-    this.instructions.push({ tag: "Icall", name, arguments: args });
+    this.instructions.push({ tag: "ICall", name, arguments: args });
   },
 
   condBr(condition: IR.Operand, trueLabel: string, falseLabel: string) {
