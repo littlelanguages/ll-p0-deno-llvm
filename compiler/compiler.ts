@@ -116,7 +116,7 @@ const compileE = (
       functionBuilder.strings.set(name, op);
     }
 
-    const opp = functionBuilder.getElementPointer(
+    return functionBuilder.getElementPointer(
       true,
       IR.pointerType(IR.i8),
       IR.arrayType(e.v.length + 1, IR.i8),
@@ -126,8 +126,6 @@ const compileE = (
         { tag: "CInt", bits: 32, value: 0 },
       ],
     );
-
-    return opp;
   } else if (e.tag === "LiteralFloat") {
     return { tag: "CFloatFP", value: e.v };
   } else if (e.tag === "UnaryExpression") {
@@ -207,13 +205,12 @@ const compileE = (
       return (typeOf(e.e1) === TST.Type.Float)
         ? functionBuilder.fmul(e1, e2)
         : functionBuilder.mul(e1, e2);
-    } else if (e.op === TST.BinaryOp.Divide) {
+    } /* (e.op === TST.BinaryOp.Divide)*/
+    {
       return (typeOf(e.e1) === TST.Type.Float)
         ? functionBuilder.fdiv(e1, e2)
         : functionBuilder.sdiv(e1, e2);
     }
-
-    throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   } else {
     throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   }
