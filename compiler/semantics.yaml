@@ -208,49 +208,49 @@
                       true
                       false
                       true
-#             - scenario:
-#                 name: Arithmetic operators
-#                 tests:
-#                   - name: "+"
-#                     input: |
-#                       fun main() {
-#                         println(1 + 1);
-#                         println(1.0 + 1.0);
-#                       }
-#                     output: |
-#                       2
-#                       2.000000
-#                   - name: "-"
-#                     input: |
-#                       fun main() {
-#                         println(2 - 1);
-#                         println(2.0 - 1.0);
-#                       }
-#                     output: |
-#                       1
-#                       1.000000
-#                   - name: "*"
-#                     input: |
-#                       fun main() {
-#                         println(3 * 2);
-#                         println(3.0 * 2.0);
-#                       }
-#                     output: |
-#                       6
-#                       6.000000
-#                   - name: "/"
-#                     input: |
-#                       fun main() {
-#                         println(6 / 2);
-#                         println(5 / 2);
-#                         println(6.0 / 2.0);
-#                         println(5.0 / 2.0);
-#                       }
-#                     output: |
-#                       3
-#                       2
-#                       3.000000
-#                       2.500000
+            - scenario:
+                name: Arithmetic operators
+                tests:
+                  - name: "+"
+                    input: |
+                      fun main() {
+                        println(1 + 1);
+                        println(1.0 + 1.0);
+                      }
+                    output: |
+                      2
+                      2.000000
+                  - name: "-"
+                    input: |
+                      fun main() {
+                        println(2 - 1);
+                        println(2.0 - 1.0);
+                      }
+                    output: |
+                      1
+                      1.000000
+                  - name: "*"
+                    input: |
+                      fun main() {
+                        println(3 * 2);
+                        println(3.0 * 2.0);
+                      }
+                    output: |
+                      6
+                      6.000000
+                  - name: "/"
+                    input: |
+                      fun main() {
+                        println(6 / 2);
+                        println(5 / 2);
+                        println(6.0 / 2.0);
+                        println(5.0 / 2.0);
+                      }
+                    output: |
+                      3
+                      2
+                      3.000000
+                      2.500000
 #       - scenario:
 #           name: Unary Expression
 #           tests:

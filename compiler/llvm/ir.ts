@@ -341,20 +341,33 @@ export enum FP {
 }
 
 export type Instruction =
+  | IAdd
   | IAnd
   | IBr
   | ICall
   | ICondBr
+  | IFAdd
   | IFCmp
+  | IFDiv
+  | IFMul
   | IFSub
   | IGetElementPointer
   | IICmp
   | ILabel
+  | IMul
   | IOr
   | IPhi
   | IRet
+  | ISDiv
   | ISub
   | IZext;
+
+export type IAdd = {
+  tag: "IAdd";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
 
 export type IAnd = {
   tag: "IAnd";
@@ -379,6 +392,27 @@ export type ICondBr = {
   condition: Operand;
   trueLabel: string;
   falseLabel: string;
+};
+
+export type IFAdd = {
+  tag: "IFAdd";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
+
+export type IFDiv = {
+  tag: "IFDiv";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
+
+export type IFMul = {
+  tag: "IFMul";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
 };
 
 export type IFCmp = {
@@ -419,6 +453,13 @@ export type ILabel = {
   name: string;
 };
 
+export type IMul = {
+  tag: "IMul";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
+
 export type IOr = {
   tag: "IOr";
   result: string;
@@ -435,6 +476,13 @@ export type IPhi = {
 export type IRet = {
   tag: "IRet";
   c: Constant;
+};
+
+export type ISDiv = {
+  tag: "ISDiv";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
 };
 
 export type ISub = {
@@ -477,7 +525,11 @@ export const write = (
     );
 
     return d.body.reduce((a, s) => {
-      const line = s.tag === "IAnd"
+      const line = s.tag === "IAdd"
+        ? `  ${s.result} = add ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
+        : s.tag === "IAnd"
         ? `  ${s.result} = and ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
         }\n`
@@ -491,12 +543,24 @@ export const write = (
         ? `  br ${
           operandToString(s.condition)
         }, label %${s.trueLabel}, label %${s.falseLabel}\n`
+        : s.tag === "IFAdd"
+        ? `  ${s.result} = fadd ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
         : s.tag === "IFCmp"
         ? `  ${s.result} = fcmp ${s.op} ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
         }\n`
+        : s.tag === "IFDiv"
+        ? `  ${s.result} = fdiv ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
         : s.tag === "IFSub"
         ? `  ${s.result} = fsub ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
+        : s.tag === "IFMul"
+        ? `  ${s.result} = fmul ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
         }\n`
         : s.tag === "IGetElementPointer"
@@ -515,6 +579,10 @@ export const write = (
         ? `  ${s.result} = or ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
         }\n`
+        : s.tag === "IMul"
+        ? `  ${s.result} = mul ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
         : s.tag === "IPhi"
         ? `  ${s.result} = phi ${typeToString(typeOf(s.incoming[0][0]))} ${
           s.incoming.map(([o, l]) => `[${operandToUntypedString(o)}, %${l}]`)
@@ -522,6 +590,10 @@ export const write = (
         }\n`
         : s.tag === "IRet"
         ? `  ret ${operandToString(s.c)}\n`
+        : s.tag === "ISDiv"
+        ? `  ${s.result} = sdiv ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
         : s.tag === "ISub"
         ? `  ${s.result} = sub ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)

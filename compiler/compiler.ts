@@ -195,7 +195,24 @@ const compileE = (
       return (typeOf(e.e1) === TST.Type.Float)
         ? functionBuilder.fcmp(IR.FP.OGE, e1, e2)
         : functionBuilder.icmp(IR.IP.SGE, e1, e2);
+    } else if (e.op === TST.BinaryOp.Plus) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fadd(e1, e2)
+        : functionBuilder.add(e1, e2);
+    } else if (e.op === TST.BinaryOp.Minus) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fsub(e1, e2)
+        : functionBuilder.sub(e1, e2);
+    } else if (e.op === TST.BinaryOp.Times) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fmul(e1, e2)
+        : functionBuilder.mul(e1, e2);
+    } else if (e.op === TST.BinaryOp.Divide) {
+      return (typeOf(e.e1) === TST.Type.Float)
+        ? functionBuilder.fdiv(e1, e2)
+        : functionBuilder.sdiv(e1, e2);
     }
+
     throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   } else {
     throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
