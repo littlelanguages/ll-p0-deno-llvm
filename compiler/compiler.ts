@@ -5,7 +5,29 @@ import * as Builders from "./llvm/builders.ts";
 export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
   const moduleBuilder = Object.assign(
     Builders.module(name),
-    { operands: new Map(), strings: new Map() },
+    {
+      operands: [new Map()],
+      strings: new Map(),
+
+      openScope: function () {
+        this.operands.push(new Map());
+      },
+      closeScope: function () {
+        this.operands.pop();
+      },
+      operand: function (name: string): IR.Operand {
+        for (let lp = this.operands.length - 1; lp >= 0; lp -= 1) {
+          const potentialResult = this.operands[lp].get(name);
+          if (potentialResult !== undefined) {
+            return potentialResult;
+          }
+        }
+        throw new Error(`Internal Error: opernad: ${name}`);
+      },
+      registerOperand: function (name: string, op: IR.Operand) {
+        this.operands[this.operands.length - 1].set(name, op);
+      },
+    },
   );
 
   moduleBuilder
@@ -36,7 +58,15 @@ const compileS = (
   s: TST.Statement,
   functionBuilder: FunctionBuilder,
 ) => {
-  if (s.tag === "BlockStatement") {
+  if (
+    s.tag === "ConstantDeclarationStatement" ||
+    s.tag === "VariableDeclarationStatement"
+  ) {
+    const e = compileE(s.e, functionBuilder);
+    const op = functionBuilder.alloca(IR.typeOf(e), undefined);
+    functionBuilder.store(op, undefined, e);
+    functionBuilder.registerOperand(s.n, op);
+  } else if (s.tag === "BlockStatement") {
     s.ss.forEach((s) => compileS(s, functionBuilder));
   } else if (s.tag === "CallStatement") {
     if (s.n === "print") {
@@ -139,8 +169,8 @@ const compileE = (
       } else {
         return functionBuilder.sub({ tag: "CInt", bits: 32, value: 0 }, op);
       }
-    } else { //e.op === TST.UnaryOp.UnaryNot
-      return op;
+    } else {
+      return functionBuilder.xor(op, { tag: "CInt", bits: 1, value: 1 });
     }
   } else if (e.tag === "TernaryExpression") {
     const thenBlock = functionBuilder.newLabel("then");
@@ -211,6 +241,9 @@ const compileE = (
         ? functionBuilder.fdiv(e1, e2)
         : functionBuilder.sdiv(e1, e2);
     }
+  } else if (e.tag === "IdentifierReference") {
+    const op = functionBuilder.operand(e.n);
+    return functionBuilder.load(toType(e.t), op, undefined);
   } else {
     throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
   }
@@ -243,9 +276,25 @@ const typeOf = (
   }
 };
 
+const toType = (t: TST.Type): IR.Type =>
+  t === TST.Type.Bool
+    ? IR.i1
+    : t === TST.Type.Float
+    ? IR.floatFP
+    : t === TST.Type.Int
+    ? IR.i32
+    : t === TST.Type.String
+    ? IR.pointerType(IR.i8)
+    : IR.i32;
+
 interface CodegenState {
-  operands: Map<string, IR.Operand>;
+  operands: Array<Map<string, IR.Operand>>;
   strings: Map<string, IR.Operand>;
+
+  openScope: () => void;
+  closeScope: () => void;
+  operand: (name: string) => IR.Operand;
+  registerOperand: (name: string, op: IR.Operand) => void;
 }
 
 type ModuleBuilder = Builders.ModuleBuilder & CodegenState;
@@ -259,5 +308,14 @@ const declareFunction = (
 ): FunctionBuilder =>
   Object.assign(
     moduleBuilder.declareFunction(name, args, result),
-    { operands: moduleBuilder.operands, strings: moduleBuilder.strings },
+    {
+      operands: moduleBuilder.operands,
+      strings: moduleBuilder.strings,
+
+      openScope: () => moduleBuilder.openScope(),
+      closeScope: () => moduleBuilder.closeScope(),
+      operand: (name: string) => moduleBuilder.operand(name),
+      registerOperand: (name: string, op: IR.Operand) =>
+        moduleBuilder.registerOperand(name, op),
+    },
   );

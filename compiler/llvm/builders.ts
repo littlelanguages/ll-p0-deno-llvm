@@ -72,6 +72,10 @@ export interface FunctionBuilder {
   instructions: Array<IR.Instruction>;
 
   add(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
+  alloca(
+    type: IR.Type,
+    alignment: number | undefined,
+  ): IR.Operand;
   and(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   br(label: string): void;
   call(name: string, params: Array<IR.Operand>): void;
@@ -90,12 +94,23 @@ export interface FunctionBuilder {
   ): IR.Operand;
   icmp(op: IR.IP, operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   label(name: string): void;
+  load(
+    type: IR.Type,
+    operand: IR.Operand,
+    alignment: number | undefined,
+  ): IR.Operand;
   mul(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   or(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   phi(incoming: Array<[op: IR.Operand, label: string]>): IR.Operand;
   ret(c: IR.Constant): void;
   sdiv(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
+  store(
+    target: IR.Operand,
+    alignment: number | undefined,
+    value: IR.Operand,
+  ): void;
   sub(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
+  xor(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   zext(type: IR.Type, operand: IR.Operand): IR.Operand;
 
   newLabel(prefix: string): string;
@@ -131,6 +146,23 @@ const functionBuilder = (
     this.registerCount += 1;
     this.instructions.push({ tag: "IAdd", result, operand0, operand1 });
     return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
+  },
+
+  alloca: function (
+    type: IR.Type,
+    alignment: number | undefined,
+  ): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push(
+      { tag: "IAlloca", result, type, alignment },
+    );
+
+    return {
+      tag: "LocalReference",
+      type: IR.pointerType(type),
+      name: result,
+    };
   },
 
   and: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
@@ -246,6 +278,22 @@ const functionBuilder = (
     this.instructions.push({ tag: "ILabel", name });
   },
 
+  load: function (
+    type: IR.Type,
+    operand: IR.Operand,
+    alignment: number | undefined,
+  ): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push({ tag: "ILoad", result, type, operand, alignment });
+
+    return {
+      tag: "LocalReference",
+      type,
+      name: result,
+    };
+  },
+
   mul: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
     const result = `%${this.registerCount}`;
     this.registerCount += 1;
@@ -290,10 +338,26 @@ const functionBuilder = (
     return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
   },
 
+  store: function (
+    target: IR.Operand,
+    alignment: number | undefined,
+    value: IR.Operand,
+  ): void {
+    this.instructions.push({ tag: "IStore", target, alignment, value });
+  },
+
   sub: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
     const result = `%${this.registerCount}`;
     this.registerCount += 1;
     this.instructions.push({ tag: "ISub", result, operand0, operand1 });
+    return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
+  },
+
+  xor: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push({ tag: "IXor", result, operand0, operand1 });
+
     return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
   },
 

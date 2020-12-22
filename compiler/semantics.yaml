@@ -251,45 +251,45 @@
                       2
                       3.000000
                       2.500000
-#       - scenario:
-#           name: Unary Expression
-#           tests:
-#             - name: "+"
-#               input: |
-#                 fun main() {
-#                   const a = 1;
-#                   const b = 1.0;
+      - scenario:
+          name: Unary Expression
+          tests:
+            - name: "+"
+              input: |
+                fun main() {
+                  const a = 1;
+                  const b = 1.0;
 
-#                   println(+a);
-#                   println(+b);
-#                 }
-#               output: |
-#                 1
-#                 1.000000
-#             - name: "-"
-#               input: |
-#                 fun main() {
-#                   const a = 1;
-#                   const b = 1.0;
+                  println(+a);
+                  println(+b);
+                }
+              output: |
+                1
+                1.000000
+            - name: "-"
+              input: |
+                fun main() {
+                  const a = 1;
+                  const b = 1.0;
 
-#                   println(-a);
-#                   println(-b);
-#                 }
-#               output: |
-#                 -1
-#                 -1.000000
-#             - name: "not !"
-#               input: |
-#                 fun main() {
-#                   const a = true;
-#                   const b = false;
+                  println(-a);
+                  println(-b);
+                }
+              output: |
+                -1
+                -1.000000
+            - name: "not !"
+              input: |
+                fun main() {
+                  const a = true;
+                  const b = false;
 
-#                   println(!a);
-#                   println(!b);
-#                 }
-#               output: |
-#                 false
-#                 true
+                  println(!a);
+                  println(!b);
+                }
+              output: |
+                false
+                true
 #       - scenario:
 #           name: Call Expression
 #           tests:

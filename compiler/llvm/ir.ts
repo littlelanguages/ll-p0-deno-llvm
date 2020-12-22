@@ -342,6 +342,7 @@ export enum FP {
 
 export type Instruction =
   | IAdd
+  | IAlloca
   | IAnd
   | IBr
   | ICall
@@ -354,12 +355,15 @@ export type Instruction =
   | IGetElementPointer
   | IICmp
   | ILabel
+  | ILoad
   | IMul
   | IOr
   | IPhi
   | IRet
   | ISDiv
+  | IStore
   | ISub
+  | IXor
   | IZext;
 
 export type IAdd = {
@@ -367,6 +371,13 @@ export type IAdd = {
   result: string;
   operand0: Operand;
   operand1: Operand;
+};
+
+export type IAlloca = {
+  tag: "IAlloca";
+  result: string;
+  type: Type;
+  alignment: number | undefined;
 };
 
 export type IAnd = {
@@ -453,6 +464,14 @@ export type ILabel = {
   name: string;
 };
 
+export type ILoad = {
+  tag: "ILoad";
+  result: string;
+  type: Type;
+  operand: Operand;
+  alignment: number | undefined;
+};
+
 export type IMul = {
   tag: "IMul";
   result: string;
@@ -485,8 +504,22 @@ export type ISDiv = {
   operand1: Operand;
 };
 
+export type IStore = {
+  tag: "IStore";
+  target: Operand;
+  alignment: number | undefined;
+  value: Operand;
+};
+
 export type ISub = {
   tag: "ISub";
+  result: string;
+  operand0: Operand;
+  operand1: Operand;
+};
+
+export type IXor = {
+  tag: "IXor";
   result: string;
   operand0: Operand;
   operand1: Operand;
@@ -528,6 +561,10 @@ export const write = (
       const line = s.tag === "IAdd"
         ? `  ${s.result} = add ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
+        }\n`
+        : s.tag === "IAlloca"
+        ? `  ${s.result} = alloca ${typeToString(s.type)} ${
+          s.alignment === undefined ? "" : `, align ${s.alignment}`
         }\n`
         : s.tag === "IAnd"
         ? `  ${s.result} = and ${operandToString(s.operand0)}, ${
@@ -575,6 +612,10 @@ export const write = (
         }\n`
         : s.tag === "ILabel"
         ? `${s.name}:\n`
+        : s.tag === "ILoad"
+        ? `  ${s.result} = load ${typeToString(s.type)}, ${
+          operandToString(s.operand)
+        }${s.alignment === undefined ? "" : `, align ${s.alignment}`}\n`
         : s.tag === "IOr"
         ? `  ${s.result} = or ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
@@ -594,8 +635,16 @@ export const write = (
         ? `  ${s.result} = sdiv ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
         }\n`
+        : s.tag === "IStore"
+        ? `  store ${operandToString(s.value)}, ${operandToString(s.target)}${
+          s.alignment === undefined ? "" : `, align ${s.alignment}`
+        }\n`
         : s.tag === "ISub"
         ? `  ${s.result} = sub ${operandToString(s.operand0)}, ${
+          operandToUntypedString(s.operand1)
+        }\n`
+        : s.tag === "IXor"
+        ? `  ${s.result} = xor ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)
         }\n`
         : /* s.tag === "IZext" */ `  ${s.result} = zext ${
