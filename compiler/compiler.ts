@@ -77,6 +77,34 @@ const compileD = (
     const op = compileE(d.e, functionBuilder);
     functionBuilder.ret(op);
     functionBuilder.build();
+  } else if (
+    d.tag === "ConstantDeclaration" || d.tag === "VariableDeclaration"
+  ) {
+    const v: IR.Constant = (d.e.tag === "LiteralInt")
+      ? { tag: "CInt", bits: 32, value: d.e.v }
+      : (d.e.tag === "LiteralBool")
+      ? { tag: "CInt", bits: 1, value: d.e.v ? 1 : 0 }
+      : (d.e.tag === "LiteralFloat")
+      ? { tag: "CFloatFP", value: d.e.v }
+      : (() => {
+        throw new Error(
+          `Internal Error: declaration: ${d.tag}: ${
+            JSON.stringify(d, null, 2)
+          }`,
+        );
+      })();
+
+    const type = toType(typeOf(d.e));
+
+    moduleBuilder.declareGlobal(`@${d.identifier}`, type, false, v);
+    moduleBuilder.registerOperand(
+      d.identifier,
+      {
+        tag: "CGlobalReference",
+        type: IR.pointerType(type),
+        name: `@${d.identifier}`,
+      },
+    );
   } else {
     throw Error(`TODO: d: ${d.tag}: ${JSON.stringify(d, null, 2)}`);
   }
@@ -111,6 +139,10 @@ const compileS = (
     const op = functionBuilder.alloca(IR.typeOf(e), undefined);
     functionBuilder.store(op, undefined, e);
     functionBuilder.registerOperand(s.n, op);
+  } else if (s.tag === "AssignmentStatement") {
+    const e = compileE(s.e, functionBuilder);
+    const op = functionBuilder.operand(s.n);
+    functionBuilder.store(op, undefined, e);
   } else if (s.tag === "BlockStatement") {
     compileSS(s.ss, functionBuilder);
   } else if (s.tag === "CallStatement") {
@@ -161,6 +193,8 @@ const compileE = (
     return { tag: "CInt", bits: 32, value: e.v };
   } else if (e.tag === "LiteralBool") {
     return { tag: "CInt", bits: 1, value: e.v ? 1 : 0 };
+  } else if (e.tag === "LiteralFloat") {
+    return { tag: "CFloatFP", value: e.v };
   } else if (e.tag === "LiteralString") {
     let op = functionBuilder.strings.get(e.v);
 
@@ -170,6 +204,7 @@ const compileE = (
       functionBuilder.declareGlobal(
         name,
         IR.arrayType(e.v.length + 1, IR.i8),
+        true,
         {
           tag: "CArray",
           memberType: IR.i8,
@@ -201,8 +236,6 @@ const compileE = (
         { tag: "CInt", bits: 32, value: 0 },
       ],
     );
-  } else if (e.tag === "LiteralFloat") {
-    return { tag: "CFloatFP", value: e.v };
   } else if (e.tag === "UnaryExpression") {
     const op = compileE(e.e, functionBuilder);
 

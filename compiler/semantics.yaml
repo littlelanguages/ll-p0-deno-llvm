@@ -359,171 +359,171 @@
                 }
               output: |
                 Result: 100.000000
-# - scenario:
-#     name: Statements
-#     tests:
-#       - scenario:
-#           name: Assignment Statement
-#           tests:
-#             - name: toplevel Bool assignment
-#               input: |
-#                 let value = false;
+- scenario:
+    name: Statements
+    tests:
+      - scenario:
+          name: Assignment Statement
+          tests:
+            - name: toplevel Bool assignment
+              input: |
+                let value = false;
 
-#                 fun main() {
-#                   value = !value;
+                fun main() {
+                  value = !value;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 true
-#             - name: toplevel Int assignment
-#               input: |
-#                 let value = 19;
+                  println(value);
+                }
+              output: |
+                true
+            - name: toplevel Int assignment
+              input: |
+                let value = 19;
 
-#                 fun main() {
-#                   value = value * value;
+                fun main() {
+                  value = value * value;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 361
-#             - name: toplevel Float assignment
-#               input: |
-#                 let value = 33.5;
+                  println(value);
+                }
+              output: |
+                361
+            - name: toplevel Float assignment
+              input: |
+                let value = 33.5;
 
-#                 fun main() {
-#                   value = value * value;
+                fun main() {
+                  value = value * value;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 1122.250000
-#             - name: same lexical scope Bool assignment
-#               input: |
-#                 fun main() {
-#                   let value = false;
+                  println(value);
+                }
+              output: |
+                1122.250000
+            - name: same lexical scope Bool assignment
+              input: |
+                fun main() {
+                  let value = false;
 
-#                   value = !value;
+                  value = !value;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 true
-#             - name: same lexical scope Int assignment
-#               input: |
-#                 fun main() {
-#                   let value = 5;
+                  println(value);
+                }
+              output: |
+                true
+            - name: same lexical scope Int assignment
+              input: |
+                fun main() {
+                  let value = 5;
 
-#                   value = value * value;
+                  value = value * value;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 25
-#             - name: same lexical scope Float assignment
-#               input: |
-#                 fun main() {
-#                   let value = 7.0;
+                  println(value);
+                }
+              output: |
+                25
+            - name: same lexical scope Float assignment
+              input: |
+                fun main() {
+                  let value = 7.0;
 
-#                   value = value * value;
+                  value = value * value;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 49.000000
-#             - name: outer lexical scope Bool assignment
-#               input: |
-#                 fun main() {
-#                   let value = false;
+                  println(value);
+                }
+              output: |
+                49.000000
+            - name: outer lexical scope Bool assignment
+              input: |
+                fun main() {
+                  let value = false;
 
-#                   {
-#                     value = !value;
-#                     println(value);
-#                   }
+                  {
+                    value = !value;
+                    println(value);
+                  }
 
-#                   println(value);
-#                 }
-#               output: |
-#                 true
-#                 true
-#             - name: outer lexical scope Int assignment
-#               input: |
-#                 fun main() {
-#                   let value = 5;
+                  println(value);
+                }
+              output: |
+                true
+                true
+            - name: outer lexical scope Int assignment
+              input: |
+                fun main() {
+                  let value = 5;
 
-#                   {
-#                     value = value * value;
-#                     println(value);
-#                   }
+                  {
+                    value = value * value;
+                    println(value);
+                  }
 
-#                   println(value);
-#                 }
-#               output: |
-#                 25
-#                 25
-#             - name: outer lexical scope Float assignment
-#               input: |
-#                 fun main() {
-#                   let value = 7.0;
+                  println(value);
+                }
+              output: |
+                25
+                25
+            - name: outer lexical scope Float assignment
+              input: |
+                fun main() {
+                  let value = 7.0;
 
-#                   {
-#                     value = value * value;
-#                     println(value);
-#                   }
+                  {
+                    value = value * value;
+                    println(value);
+                  }
 
-#                   println(value);
-#                 }
-#               output: |
-#                 49.000000
-#                 49.000000
-#             - name: parameter Bool assignment
-#               input: |
-#                 fun test(a: Bool): Bool {
-#                   a = !a;
-#                   return a;
-#                 }
+                  println(value);
+                }
+              output: |
+                49.000000
+                49.000000
+            - name: parameter Bool assignment
+              input: |
+                fun test(a: Bool): Bool {
+                  a = !a;
+                  return a;
+                }
 
-#                 fun main() {
-#                   println(test(true));
-#                 }
-#               output: |
-#                 false
-#             - name: parameter Int assignment
-#               input: |
-#                 fun test(a: Int): Int {
-#                   a = a * a;
-#                   return a * a;
-#                 }
+                fun main() {
+                  println(test(true));
+                }
+              output: |
+                false
+            - name: parameter Int assignment
+              input: |
+                fun test(a: Int): Int {
+                  a = a * a;
+                  return a * a;
+                }
 
-#                 fun main() {
-#                   println(test(2));
-#                 }
-#               output: |
-#                 16
-#             - name: parameter Float assignment
-#               input: |
-#                 fun test(a: Float): Float {
-#                   a = a * a;
-#                   return a * a;
-#                 }
+                fun main() {
+                  println(test(2));
+                }
+              output: |
+                16
+            - name: parameter Float assignment
+              input: |
+                fun test(a: Float): Float {
+                  a = a * a;
+                  return a * a;
+                }
 
-#                 fun main() {
-#                   println(test(5.0));
-#                 }
-#               output: |
-#                 625.000000
-#       - scenario:
-#           name: Variable Declaration Statement
-#           tests:
-#             - name: Boolean
-#               input: |
-#                 fun main() {
-#                   let value = true;
+                fun main() {
+                  println(test(5.0));
+                }
+              output: |
+                625.000000
+      # - scenario:
+      #     name: Variable Declaration Statement
+      #     tests:
+      #       - name: Boolean
+      #         input: |
+      #           fun main() {
+      #             let value = true;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 true
+      #             println(value);
+      #           }
+      #         output: |
+      #           true
 #             - name: Integer
 #               input: |
 #                 fun main() {

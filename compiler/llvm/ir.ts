@@ -154,6 +154,7 @@ export type GlobalDeclaration = {
   tag: "GlobalDeclaration";
   name: string;
   type: Type;
+  constant: boolean;
   value: Constant;
 };
 
@@ -553,11 +554,13 @@ export const write = (
     );
 
   const writeGlobalDeclaration = (d: GlobalDeclaration): Promise<any> =>
-    w.write(
-      `\n${d.name} = unnamed_addr constant ${typeToString(d.type)} ${
-        operandToString(d.value)
-      }\n`,
-    );
+    d.constant
+      ? w.write(
+        `\n${d.name} = unnamed_addr constant ${typeToString(d.type)} ${
+          operandToString(d.value)
+        }\n`,
+      )
+      : w.write(`\n${d.name} = global ${operandToString(d.value)}\n`);
 
   const writeFunctionDeclaration = (d: FunctionDeclaration): Promise<any> => {
     const header = w.write(

@@ -11,7 +11,12 @@ export interface ModuleBuilder {
     result: IR.Type,
   ): ModuleBuilder;
 
-  declareGlobal(name: String, type: IR.Type, value: IR.Constant): void;
+  declareGlobal(
+    name: String,
+    type: IR.Type,
+    constant: boolean,
+    value: IR.Constant,
+  ): void;
 
   declareFunction(
     name: string,
@@ -42,10 +47,11 @@ export const module = (id: string): ModuleBuilder => ({
   declareGlobal: function (
     name: string,
     type: IR.Type,
+    constant: boolean,
     value: IR.Constant,
   ) {
     this.globalDeclarations.push(
-      { tag: "GlobalDeclaration", name, value, type },
+      { tag: "GlobalDeclaration", name, value, constant, type },
     );
   },
 
@@ -115,7 +121,12 @@ export interface FunctionBuilder {
   zext(type: IR.Type, operand: IR.Operand): IR.Operand;
 
   newLabel(prefix: string): string;
-  declareGlobal(name: string, type: IR.Type, value: IR.Constant): void;
+  declareGlobal(
+    name: string,
+    type: IR.Type,
+    constant: boolean,
+    value: IR.Constant,
+  ): void;
 
   build(): void;
 }
@@ -388,8 +399,9 @@ const functionBuilder = (
   declareGlobal: (
     name: string,
     type: IR.Type,
+    constant: boolean,
     value: IR.Constant,
-  ) => module.declareGlobal(name, type, value),
+  ) => module.declareGlobal(name, type, constant, value),
 
   build: function () {
     module.functionDeclarations.push({
