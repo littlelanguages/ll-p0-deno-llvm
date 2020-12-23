@@ -711,310 +711,310 @@
                 a: false
                 b: -120
                 c: -240.000000
-# - scenario:
-#     name: Declarations
-#     tests:
-#       - scenario:
-#           name: Unit Function
-#           tests:
-#             - name: without parameters
-#               input: |
-#                 fun test() {
-#                   println("hello world");
-#                 }
+- scenario:
+    name: Declarations
+    tests:
+      - scenario:
+          name: Unit Function
+          tests:
+            - name: without parameters
+              input: |
+                fun test() {
+                  println("hello world");
+                }
 
-#                 fun main() {
-#                   test();
-#                 }
-#               output: |
-#                 hello world
-#             - name: with parameters
-#               input: |
-#                 fun test(a: Bool, b: Int, c: Float) {
-#                   println("a: ", a);
-#                   println("b: ", b);
-#                   println("c: ", c);
-#                 }
+                fun main() {
+                  test();
+                }
+              output: |
+                hello world
+            - name: with parameters
+              input: |
+                fun test(a: Bool, b: Int, c: Float) {
+                  println("a: ", a);
+                  println("b: ", b);
+                  println("c: ", c);
+                }
 
-#                 fun main() {
-#                   test(false, -120, -240.0);
-#                 }
-#               output: |
-#                 a: false
-#                 b: -120
-#                 c: -240.000000
-#       - scenario:
-#           name: Value Function
-#           tests:
-#             - name: without parameters
-#               input: |
-#                 fun testB(): Bool {
-#                   return false;
-#                 }
+                fun main() {
+                  test(false, -120, -240.0);
+                }
+              output: |
+                a: false
+                b: -120
+                c: -240.000000
+      - scenario:
+          name: Value Function
+          tests:
+            - name: without parameters
+              input: |
+                fun testB(): Bool {
+                  return false;
+                }
 
-#                 fun testI(): Int {
-#                   return 1;
-#                 }
+                fun testI(): Int {
+                  return 1;
+                }
 
-#                 fun testF(): Float {
-#                   return 2.0;
-#                 }
+                fun testF(): Float {
+                  return 2.0;
+                }
 
-#                 fun main() {
-#                   println(testB());
-#                   println(testI());
-#                   println(testF());
-#                 }
-#               output: |
-#                 false
-#                 1
-#                 2.000000
-#             - name: with parameters
-#               input: |
-#                 fun testB(b: Bool, i: Int, f: Float): Bool {
-#                   return b;
-#                 }
+                fun main() {
+                  println(testB());
+                  println(testI());
+                  println(testF());
+                }
+              output: |
+                false
+                1
+                2.000000
+            - name: with parameters
+              input: |
+                fun testB(b: Bool, i: Int, f: Float): Bool {
+                  return b;
+                }
 
-#                 fun testI(b: Bool, i: Int, f: Float): Int {
-#                   return i;
-#                 }
+                fun testI(b: Bool, i: Int, f: Float): Int {
+                  return i;
+                }
 
-#                 fun testF(b: Bool, i: Int, f: Float): Float {
-#                   return f;
-#                 }
+                fun testF(b: Bool, i: Int, f: Float): Float {
+                  return f;
+                }
 
-#                 fun main() {
-#                   println(testB(false, 1, 2.0));
-#                   println(testI(false, 1, 2.0));
-#                   println(testF(false, 1, 2.0));
-#                 }
-#               output: |
-#                 false
-#                 1
-#                 2.000000
-#             - name: return expressions includes references to parameter and local variable
-#               input: |
-#                 fun test(x: Int): Int {
-#                   let result = 10;
+                fun main() {
+                  println(testB(false, 1, 2.0));
+                  println(testI(false, 1, 2.0));
+                  println(testF(false, 1, 2.0));
+                }
+              output: |
+                false
+                1
+                2.000000
+            - name: return expressions includes references to parameter and local variable
+              input: |
+                fun test(x: Int): Int {
+                  let result = 10;
 
-#                   if (x == 0)  result = 11; else result = 12;
+                  if (x == 0)  result = 11; else result = 12;
 
-#                   return result + x;
-#                 }
+                  return result + x;
+                }
 
-#                 fun main() {
-#                   println("main.1: ", test(1));
-#                 }
-#               output: |
-#                 main.1: 13
-#       - scenario:
-#           name: Variable
-#           tests:
-#             - name: Bool
-#               input: |
-#                 let b = true;
+                fun main() {
+                  println("main.1: ", test(1));
+                }
+              output: |
+                main.1: 13
+      - scenario:
+          name: Variable
+          tests:
+            - name: Bool
+              input: |
+                let b = true;
 
-#                 fun main() {
-#                   println(b);
-#                 }
-#               output: |
-#                 true
-#             - name: Int
-#               input: |
-#                 let i = 1;
+                fun main() {
+                  println(b);
+                }
+              output: |
+                true
+            - name: Int
+              input: |
+                let i = 1;
 
-#                 fun main() {
-#                   println(i);
-#                 }
-#               output: |
-#                 1
-#             - name: Float
-#               input: |
-#                 let f = -9.5;
+                fun main() {
+                  println(i);
+                }
+              output: |
+                1
+            - name: Float
+              input: |
+                let f = -9.5;
 
-#                 fun main() {
-#                   println(f);
-#                 }
-#               output: |
-#                 -9.500000
-#       - scenario:
-#           name: Constant
-#           tests:
-#             - name: Bool
-#               input: |
-#                 const b = true;
+                fun main() {
+                  println(f);
+                }
+              output: |
+                -9.500000
+      - scenario:
+          name: Constant
+          tests:
+            - name: Bool
+              input: |
+                const b = true;
 
-#                 fun main() {
-#                   println(b);
-#                 }
-#               output: |
-#                 true
-#             - name: Int
-#               input: |
-#                 const i = 1;
+                fun main() {
+                  println(b);
+                }
+              output: |
+                true
+            - name: Int
+              input: |
+                const i = 1;
 
-#                 fun main() {
-#                   println(i);
-#                 }
-#               output: |
-#                 1
-#             - name: Float
-#               input: |
-#                 const f = -9.5;
+                fun main() {
+                  println(i);
+                }
+              output: |
+                1
+            - name: Float
+              input: |
+                const f = -9.5;
 
-#                 fun main() {
-#                   println(f);
-#                 }
-#               output: |
-#                 -9.500000
-#       - scenario:
-#           name: Combination of toplevel and statement declarations
-#           tests:
-#             - name: nested constant
-#               input: |
-#                 const x = 1;
+                fun main() {
+                  println(f);
+                }
+              output: |
+                -9.500000
+      - scenario:
+          name: Combination of toplevel and statement declarations
+          tests:
+            - name: nested constant
+              input: |
+                const x = 1;
 
-#                 fun main() {
-#                   println(x);
+                fun main() {
+                  println(x);
 
-#                   const x = 2;
+                  const x = 2;
 
-#                   println(x);
-#                 }
-#               output: |
-#                 1
-#                 2
-#             - name: deep nested constant
-#               input: |
-#                 const x = 1;
+                  println(x);
+                }
+              output: |
+                1
+                2
+            - name: deep nested constant
+              input: |
+                const x = 1;
 
-#                 fun main() {
-#                   println(x);
+                fun main() {
+                  println(x);
 
-#                   const x = 2;
-#                   println(x);
+                  const x = 2;
+                  println(x);
 
-#                   {
-#                     const x = 3;
-#                     println(x);
-#                   }
+                  {
+                    const x = 3;
+                    println(x);
+                  }
 
-#                   println(x);
-#                 }
-#               output: |
-#                 1
-#                 2
-#                 3
-#                 2
-#             - name: constants across declarations
-#               input: |
-#                 const x = 1;
+                  println(x);
+                }
+              output: |
+                1
+                2
+                3
+                2
+            - name: constants across declarations
+              input: |
+                const x = 1;
 
-#                 fun test() {
-#                   const x = 2;
+                fun test() {
+                  const x = 2;
 
-#                   println(x);
-#                 }
+                  println(x);
+                }
 
-#                 fun main() {
-#                   println(x);
+                fun main() {
+                  println(x);
 
-#                   test();
+                  test();
 
-#                   println(x);
-#                 }
-#               output: |
-#                 1
-#                 2
-#                 1
-#             - name: nested variables
-#               input: |
-#                 let x = 1;
+                  println(x);
+                }
+              output: |
+                1
+                2
+                1
+            - name: nested variables
+              input: |
+                let x = 1;
 
-#                 fun main() {
-#                   println(x);
+                fun main() {
+                  println(x);
 
-#                   let x = 2;
+                  let x = 2;
 
-#                   println(x);
-#                 }
-#               output: |
-#                 1
-#                 2
-#             - name: deep nested variables
-#               input: |
-#                 let x = 1;
+                  println(x);
+                }
+              output: |
+                1
+                2
+            - name: deep nested variables
+              input: |
+                let x = 1;
 
-#                 fun main() {
-#                   println(x);
+                fun main() {
+                  println(x);
 
-#                   let x = 2;
-#                   println(x);
+                  let x = 2;
+                  println(x);
 
-#                   {
-#                     let x = 3;
-#                     println(x);
-#                   }
+                  {
+                    let x = 3;
+                    println(x);
+                  }
 
-#                   println(x);
-#                 }
-#               output: |
-#                 1
-#                 2
-#                 3
-#                 2
-#             - name: variables across declarations
-#               input: |
-#                 let x = 1;
+                  println(x);
+                }
+              output: |
+                1
+                2
+                3
+                2
+            - name: variables across declarations
+              input: |
+                let x = 1;
 
-#                 fun test() {
-#                   let x = 2;
+                fun test() {
+                  let x = 2;
 
-#                   println(x);
-#                 }
+                  println(x);
+                }
 
-#                 fun main() {
-#                   println(x);
+                fun main() {
+                  println(x);
 
-#                   test();
+                  test();
 
-#                   println(x);
-#                 }
-#               output: |
-#                 1
-#                 2
-#                 1
-#             - name: combination of toplevel, parameters and deep nested variables
-#               input: |
-#                 let x = 2;
+                  println(x);
+                }
+              output: |
+                1
+                2
+                1
+            - name: combination of toplevel, parameters and deep nested variables
+              input: |
+                let x = 2;
 
-#                 fun test(x: Int) {
-#                   println("test.1: ", x);
+                fun test(x: Int) {
+                  println("test.1: ", x);
 
-#                   {
-#                     let x = x * x;
-#                     println("test.2: ", x);
-#                   }
+                  {
+                    let x = x * x;
+                    println("test.2: ", x);
+                  }
 
-#                   println("test.3: ", x);
-#                 }
+                  println("test.3: ", x);
+                }
 
-#                 fun main() {
-#                   println("main.1: ", x);
+                fun main() {
+                  println("main.1: ", x);
 
-#                   {
-#                     let x = x * x;
-#                     println("main.2: ", x);
-#                     test(x*x);
-#                     println("main.3: ", x);
-#                   }
-#                   println("main.4: ", x);
-#                 }
-#               output: |
-#                 main.1: 2
-#                 main.2: 4
-#                 test.1: 16
-#                 test.2: 256
-#                 test.3: 16
-#                 main.3: 4
-#                 main.4: 2
+                  {
+                    let x = x * x;
+                    println("main.2: ", x);
+                    test(x*x);
+                    println("main.3: ", x);
+                  }
+                  println("main.4: ", x);
+                }
+              output: |
+                main.1: 2
+                main.2: 4
+                test.1: 16
+                test.2: 256
+                test.3: 16
+                main.3: 4
+                main.4: 2

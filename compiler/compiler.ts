@@ -63,6 +63,7 @@ const compileD = (
       moduleBuilder,
     );
 
+    functionBuilder.openScope();
     ps.forEach((p, index) => {
       const op = functionBuilder.alloca(p[1], undefined);
       functionBuilder.store(
@@ -73,9 +74,10 @@ const compileD = (
       functionBuilder.registerOperand(p[0], op);
     });
 
-    compileSS(d.ss, functionBuilder);
+    d.ss.forEach((s) => compileS(s, functionBuilder));
     const op = compileE(d.e, functionBuilder);
     functionBuilder.ret(op);
+    functionBuilder.closeScope();
     functionBuilder.build();
   } else if (d.tag === "FunctionDeclaration" && d.e === undefined) {
     const ps: Array<[string, IR.Type]> = d.ps.map((p) => [p.n, toType(p.t)]);
@@ -87,6 +89,7 @@ const compileD = (
       moduleBuilder,
     );
 
+    functionBuilder.openScope();
     ps.forEach((p, index) => {
       const op = functionBuilder.alloca(p[1], undefined);
       functionBuilder.store(
@@ -97,8 +100,10 @@ const compileD = (
       functionBuilder.registerOperand(p[0], op);
     });
 
-    compileSS(d.ss, functionBuilder);
+    d.ss.forEach((s) => compileS(s, functionBuilder));
     functionBuilder.retvoid();
+    functionBuilder.closeScope();
+
     functionBuilder.build();
   } else if (
     d.tag === "ConstantDeclaration" || d.tag === "VariableDeclaration"
@@ -148,7 +153,11 @@ const compileMain = (
 const compileSS = (
   ss: Array<TST.Statement>,
   functionBuilder: FunctionBuilder,
-) => ss.forEach((s) => compileS(s, functionBuilder));
+) => {
+  functionBuilder.openScope();
+  ss.forEach((s) => compileS(s, functionBuilder));
+  functionBuilder.closeScope();
+};
 
 const compileS = (
   s: TST.Statement,
