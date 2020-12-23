@@ -82,7 +82,7 @@ const compileD = (
       functionBuilder.registerOperand(p[0], op);
     });
 
-    d.ss.forEach((s) => compileS(s, functionBuilder));
+    compileSS(d.ss, functionBuilder);
 
     if (d.e === undefined) {
       functionBuilder.retvoid();
@@ -140,9 +140,7 @@ const compileSS = (
   ss: Array<TST.Statement>,
   functionBuilder: FunctionBuilder,
 ) => {
-  functionBuilder.openScope();
   ss.forEach((s) => compileS(s, functionBuilder));
-  functionBuilder.closeScope();
 };
 
 const compileS = (
@@ -211,7 +209,9 @@ const compileS = (
 
     functionBuilder.label(mergeBlock);
   } else if (s.tag === "BlockStatement") {
+    functionBuilder.openScope();
     compileSS(s.ss, functionBuilder);
+    functionBuilder.closeScope();
   } else if (s.tag === "CallStatement") {
     if (s.n === "print") {
       compilePrintStatement(s, functionBuilder);
