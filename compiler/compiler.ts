@@ -77,12 +77,8 @@ const compileD = (
 
     functionBuilder.openScope();
     ps.forEach((p, index) => {
-      const op = functionBuilder.alloca(p[1], undefined);
-      functionBuilder.store(
-        op,
-        undefined,
-        IROperand.localReference(p[1], `%${p[0]}`),
-      );
+      const op = functionBuilder.alloca(p[1]);
+      functionBuilder.store(op, IROperand.localReference(p[1], `%${p[0]}`));
       functionBuilder.registerOperand(p[0], op);
     });
 
@@ -158,13 +154,13 @@ const compileS = (
     s.tag === "VariableDeclarationStatement"
   ) {
     const e = compileE(s.e, functionBuilder);
-    const op = functionBuilder.alloca(IROperand.typeOf(e), undefined);
-    functionBuilder.store(op, undefined, e);
+    const op = functionBuilder.alloca(IROperand.typeOf(e));
+    functionBuilder.store(op, e);
     functionBuilder.registerOperand(s.n, op);
   } else if (s.tag === "AssignmentStatement") {
     const e = compileE(s.e, functionBuilder);
     const op = functionBuilder.operand(s.n);
-    functionBuilder.store(op, undefined, e);
+    functionBuilder.store(op, e);
   } else if (s.tag === "IfThenElseStatement") {
     if (s.s2 === undefined) {
       const thenBlock = functionBuilder.newLabel("then");
@@ -383,7 +379,7 @@ const compileE = (
     }
   } else if (e.tag === "IdentifierReference") {
     const op = functionBuilder.operand(e.n);
-    return functionBuilder.load(toType(e.t), op, undefined);
+    return functionBuilder.load(toType(e.t), op);
   } /* (e.tag === "CallExpression")*/ else {
     return functionBuilder.call(
       `@${e.n}`,

@@ -72,7 +72,6 @@ export type IAlloca = {
   tag: "IAlloca";
   result: string;
   type: IRType.Type;
-  alignment: number | undefined;
 };
 
 export type IAnd = {
@@ -172,7 +171,6 @@ export type ILoad = {
   result: string;
   type: IRType.Type;
   operand: IROperand.Operand;
-  alignment: number | undefined;
 };
 
 export type IMul = {
@@ -214,7 +212,6 @@ export type ISDiv = {
 export type IStore = {
   tag: "IStore";
   target: IROperand.Operand;
-  alignment: number | undefined;
   value: IROperand.Operand;
 };
 
@@ -245,9 +242,7 @@ export const toString = (i: Instruction): string =>
       IROperand.toUntypedString(i.operand1)
     }\n`
     : i.tag === "IAlloca"
-    ? `  ${i.result} = alloca ${IRType.toString(i.type)} ${
-      i.alignment === undefined ? "" : `, align ${i.alignment}`
-    }\n`
+    ? `  ${i.result} = alloca ${IRType.toString(i.type)}\n`
     : i.tag === "IAnd"
     ? `  ${i.result} = and ${IROperand.toString(i.operand0)}, ${
       IROperand.toUntypedString(i.operand1)
@@ -301,7 +296,7 @@ export const toString = (i: Instruction): string =>
     : i.tag === "ILoad"
     ? `  ${i.result} = load ${IRType.toString(i.type)}, ${
       IROperand.toString(i.operand)
-    }${i.alignment === undefined ? "" : `, align ${i.alignment}`}\n`
+    }\n`
     : i.tag === "IOr"
     ? `  ${i.result} = or ${IROperand.toString(i.operand0)}, ${
       IROperand.toUntypedString(i.operand1)
@@ -326,8 +321,8 @@ export const toString = (i: Instruction): string =>
       IROperand.toUntypedString(i.operand1)
     }\n`
     : i.tag === "IStore"
-    ? `  store ${IROperand.toString(i.value)}, ${IROperand.toString(i.target)}${
-      i.alignment === undefined ? "" : `, align ${i.alignment}`
+    ? `  store ${IROperand.toString(i.value)}, ${
+      IROperand.toString(i.target)
     }\n`
     : i.tag === "ISub"
     ? `  ${i.result} = sub ${IROperand.toString(i.operand0)}, ${

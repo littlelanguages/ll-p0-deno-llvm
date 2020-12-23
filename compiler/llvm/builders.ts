@@ -86,7 +86,6 @@ export interface FunctionBuilder {
   ): IROperand.Operand;
   alloca(
     type: IRType.Type,
-    alignment: number | undefined,
   ): IROperand.Operand;
   and(
     operand0: IROperand.Operand,
@@ -141,7 +140,6 @@ export interface FunctionBuilder {
   load(
     type: IRType.Type,
     operand: IROperand.Operand,
-    alignment: number | undefined,
   ): IROperand.Operand;
   mul(
     operand0: IROperand.Operand,
@@ -162,7 +160,6 @@ export interface FunctionBuilder {
   ): IROperand.Operand;
   store(
     target: IROperand.Operand,
-    alignment: number | undefined,
     value: IROperand.Operand,
   ): void;
   sub(
@@ -219,11 +216,10 @@ const functionBuilder = (
 
   alloca: function (
     type: IRType.Type,
-    alignment: number | undefined,
   ): IROperand.Operand {
     const result = this.newRegister();
     this.instructions.push(
-      { tag: "IAlloca", result, type, alignment },
+      { tag: "IAlloca", result, type },
     );
     return IROperand.localReference(IRType.pointerType(type), result);
   },
@@ -350,10 +346,9 @@ const functionBuilder = (
   load: function (
     type: IRType.Type,
     operand: IROperand.Operand,
-    alignment: number | undefined,
   ): IROperand.Operand {
     const result = this.newRegister();
-    this.instructions.push({ tag: "ILoad", result, type, operand, alignment });
+    this.instructions.push({ tag: "ILoad", result, type, operand });
     return IROperand.localReference(type, result);
   },
 
@@ -402,10 +397,9 @@ const functionBuilder = (
 
   store: function (
     target: IROperand.Operand,
-    alignment: number | undefined,
     value: IROperand.Operand,
   ): void {
-    this.instructions.push({ tag: "IStore", target, alignment, value });
+    this.instructions.push({ tag: "IStore", target, value });
   },
 
   sub: function (
