@@ -78,7 +78,8 @@ export interface FunctionBuilder {
   ): IR.Operand;
   and(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   br(label: string): void;
-  call(name: string, params: Array<IR.Operand>): void;
+  call(name: string, type: IR.Type, params: Array<IR.Operand>): IR.Operand;
+  callvoid(name: string, params: Array<IR.Operand>): void;
   condBr(condition: IR.Operand, trueLabel: string, falseLabel: string): void;
   fadd(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   fcmp(op: IR.FP, operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
@@ -102,7 +103,7 @@ export interface FunctionBuilder {
   mul(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   or(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   phi(incoming: Array<[op: IR.Operand, label: string]>): IR.Operand;
-  ret(c: IR.Constant): void;
+  ret(op: IR.Operand): void;
   sdiv(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   store(
     target: IR.Operand,
@@ -181,8 +182,22 @@ const functionBuilder = (
     this.instructions.push({ tag: "IBr", label });
   },
 
-  call: function (name: string, args: Array<IR.Operand>) {
-    this.instructions.push({ tag: "ICall", name, arguments: args });
+  call: function (
+    name: string,
+    type: IR.Type,
+    args: Array<IR.Operand>,
+  ): IR.Operand {
+    const result = this.newRegister();
+
+    this.instructions.push(
+      { tag: "ICall", result, type, name, arguments: args },
+    );
+
+    return { tag: "LocalReference", type, name: result };
+  },
+
+  callvoid: function (name: string, args: Array<IR.Operand>) {
+    this.instructions.push({ tag: "ICallVoid", name, arguments: args });
   },
 
   condBr(condition: IR.Operand, trueLabel: string, falseLabel: string) {
@@ -192,9 +207,10 @@ const functionBuilder = (
   },
 
   fadd: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
+
     this.instructions.push({ tag: "IFAdd", result, operand0, operand1 });
+
     return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
   },
 
@@ -215,9 +231,10 @@ const functionBuilder = (
   },
 
   fdiv: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
+
     this.instructions.push({ tag: "IFDiv", result, operand0, operand1 });
+
     return { tag: "LocalReference", type: IR.typeOf(operand0), name: result };
   },
 

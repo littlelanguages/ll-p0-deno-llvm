@@ -22,7 +22,7 @@ export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
             return potentialResult;
           }
         }
-        throw new Error(`Internal Error: opernad: ${name}`);
+        throw new Error(`Internal Error: operand: ${name}`);
       },
       registerOperand: function (name: string, op: IR.Operand) {
         this.operands[this.operands.length - 1].set(name, op);
@@ -37,9 +37,49 @@ export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
     .declareExternal("@_print_float", [IR.floatFP], IR.voidType)
     .declareExternal("@_print_ln", [], IR.voidType);
 
+  compileDS(tst.d, moduleBuilder);
+
   compileMain(tst, moduleBuilder);
 
   return moduleBuilder.build();
+};
+
+const compileDS = (
+  ds: Array<TST.Declaration>,
+  moduleBuilder: ModuleBuilder,
+) => ds.forEach((d) => compileD(d, moduleBuilder));
+
+const compileD = (
+  d: TST.Declaration,
+  moduleBuilder: ModuleBuilder,
+) => {
+  if (d.tag === "FunctionDeclaration" && d.e !== undefined) {
+    const ps: Array<[string, IR.Type]> = d.ps.map((p) => [p.n, toType(p.t)]);
+
+    const functionBuilder = declareFunction(
+      `@${d.n}`,
+      ps,
+      toType(typeOf(d.e)),
+      moduleBuilder,
+    );
+
+    ps.forEach((p, index) => {
+      const op = functionBuilder.alloca(p[1], undefined);
+      functionBuilder.store(
+        op,
+        undefined,
+        { tag: "LocalReference", type: p[1], name: `%${p[0]}` },
+      );
+      functionBuilder.registerOperand(p[0], op);
+    });
+
+    compileSS(d.ss, functionBuilder);
+    const op = compileE(d.e, functionBuilder);
+    functionBuilder.ret(op);
+    functionBuilder.build();
+  } else {
+    throw Error(`TODO: d: ${d.tag}: ${JSON.stringify(d, null, 2)}`);
+  }
 };
 
 const compileMain = (
@@ -54,6 +94,11 @@ const compileMain = (
   functionBuilder.build();
 };
 
+const compileSS = (
+  ss: Array<TST.Statement>,
+  functionBuilder: FunctionBuilder,
+) => ss.forEach((s) => compileS(s, functionBuilder));
+
 const compileS = (
   s: TST.Statement,
   functionBuilder: FunctionBuilder,
@@ -67,16 +112,16 @@ const compileS = (
     functionBuilder.store(op, undefined, e);
     functionBuilder.registerOperand(s.n, op);
   } else if (s.tag === "BlockStatement") {
-    s.ss.forEach((s) => compileS(s, functionBuilder));
+    compileSS(s.ss, functionBuilder);
   } else if (s.tag === "CallStatement") {
     if (s.n === "print") {
       compilePrintStatement(s, functionBuilder);
     } else if (s.n === "println") {
       compilePrintStatement(s, functionBuilder);
-      functionBuilder.call("@_print_ln", []);
+      functionBuilder.callvoid("@_print_ln", []);
     } else {
-      functionBuilder.call(
-        s.n,
+      functionBuilder.callvoid(
+        `@${s.n}`,
         s.args.map((e) => compileE(e, functionBuilder)),
       );
     }
@@ -104,7 +149,7 @@ const compilePrintStatement = (
       ? "@_print_string"
       : "@_print_float";
 
-    functionBuilder.call(name, [eo]);
+    functionBuilder.callvoid(name, [eo]);
   });
 };
 
@@ -244,8 +289,12 @@ const compileE = (
   } else if (e.tag === "IdentifierReference") {
     const op = functionBuilder.operand(e.n);
     return functionBuilder.load(toType(e.t), op, undefined);
-  } else {
-    throw Error(`TODO: e: ${e.tag}: ${JSON.stringify(e, null, 2)}`);
+  } /* (e.tag === "CallExpression")*/ else {
+    return functionBuilder.call(
+      `@${e.n}`,
+      toType(e.t),
+      e.args.map((e) => compileE(e, functionBuilder)),
+    );
   }
 };
 

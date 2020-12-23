@@ -346,6 +346,7 @@ export type Instruction =
   | IAnd
   | IBr
   | ICall
+  | ICallVoid
   | ICondBr
   | IFAdd
   | IFCmp
@@ -394,6 +395,14 @@ export type IBr = {
 
 export type ICall = {
   tag: "ICall";
+  result: string;
+  name: string;
+  type: Type;
+  arguments: Array<Operand>;
+};
+
+export type ICallVoid = {
+  tag: "ICallVoid";
   name: string;
   arguments: Array<Operand>;
 };
@@ -553,7 +562,7 @@ export const write = (
   const writeFunctionDeclaration = (d: FunctionDeclaration): Promise<any> => {
     const header = w.write(
       `\ndefine external ccc ${typeToString(d.result)} ${d.name}(${
-        d.arguments.map(([n, t]) => `${typeToString(t)} ${n}}`).join(", ")
+        d.arguments.map(([n, t]) => `${typeToString(t)} %${n}`).join(", ")
       }) {\n`,
     );
 
@@ -573,6 +582,10 @@ export const write = (
         : s.tag === "IBr"
         ? `  br label %${s.label}\n`
         : s.tag === "ICall"
+        ? `  ${s.result} = call ccc ${typeToString(s.type)} ${s.name}(${
+          s.arguments.map(operandToString).join(", ")
+        })\n`
+        : s.tag === "ICallVoid"
         ? `  call ccc void ${s.name}(${
           s.arguments.map(operandToString).join(", ")
         })\n`

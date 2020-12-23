@@ -290,75 +290,75 @@
               output: |
                 false
                 true
-#       - scenario:
-#           name: Call Expression
-#           tests:
-#             - name: function without parameters returns Bool
-#               input: |
-#                 fun t(): Bool {
-#                   return true;
-#                 }
+      - scenario:
+          name: Call Expression
+          tests:
+            - name: function without parameters returns Bool
+              input: |
+                fun t(): Bool {
+                  return true;
+                }
 
-#                 fun main() {
-#                   println("Result: ", t());
-#                 }
-#               output: |
-#                 Result: true
-#             - name: function without parameters returns Int
-#               input: |
-#                 fun t(): Int {
-#                   return 123;
-#                 }
+                fun main() {
+                  println("Result: ", t());
+                }
+              output: |
+                Result: true
+            - name: function without parameters returns Int
+              input: |
+                fun t(): Int {
+                  return 123;
+                }
 
-#                 fun main() {
-#                   println("Result: ", t());
-#                 }
-#               output: |
-#                 Result: 123
-#             - name: function without parameters returns Float
-#               input: |
-#                 fun t(): Float {
-#                   return 12.5;
-#                 }
+                fun main() {
+                  println("Result: ", t());
+                }
+              output: |
+                Result: 123
+            - name: function without parameters returns Float
+              input: |
+                fun t(): Float {
+                  return 12.5;
+                }
 
-#                 fun main() {
-#                   println("Result: ", t());
-#                 }
-#               output: |
-#                 Result: 12.500000
-#             - name: function with parameters returns Bool
-#               input: |
-#                 fun t(a : Bool): Bool {
-#                   return !a;
-#                 }
+                fun main() {
+                  println("Result: ", t());
+                }
+              output: |
+                Result: 12.500000
+            - name: function with parameters returns Bool
+              input: |
+                fun t(a : Bool): Bool {
+                  return !a;
+                }
 
-#                 fun main() {
-#                   println("Result: ", t(true));
-#                 }
-#               output: |
-#                 Result: false
-#             - name: function with parameters returns Int
-#               input: |
-#                 fun t(a : Int): Int {
-#                   return a * a;
-#                 }
+                fun main() {
+                  println("Result: ", t(true));
+                }
+              output: |
+                Result: false
+            - name: function with parameters returns Int
+              input: |
+                fun t(a : Int): Int {
+                  return a * a;
+                }
 
-#                 fun main() {
-#                   println("Result: ", t(10));
-#                 }
-#               output: |
-#                 Result: 100
-#             - name: function with parameters returns Float
-#               input: |
-#                 fun t(a : Float): Float {
-#                   return a * a;
-#                 }
+                fun main() {
+                  println("Result: ", t(10));
+                }
+              output: |
+                Result: 100
+            - name: function with parameters returns Float
+              input: |
+                fun t(a : Float): Float {
+                  return a * a;
+                }
 
-#                 fun main() {
-#                   println("Result: ", t(10.0));
-#                 }
-#               output: |
-#                 Result: 100.000000
+                fun main() {
+                  println("Result: ", t(10.0));
+                }
+              output: |
+                Result: 100.000000
 # - scenario:
 #     name: Statements
 #     tests:
