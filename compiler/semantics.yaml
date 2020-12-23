@@ -572,71 +572,71 @@
                 }
               output: |
                 1.000000
-#       - scenario:
-#           name: If Statement
-#           tests:
-#             - scenario:
-#                 name: No else
-#                 tests:
-#                   - name: true branch side effect
-#                     input: |
-#                       fun main() {
-#                         let x = 1;
+      - scenario:
+          name: If Statement
+          tests:
+            - scenario:
+                name: No else
+                tests:
+                  - name: true branch side effect
+                    input: |
+                      fun main() {
+                        let x = 1;
 
-#                         if (x == 1) {
-#                           x = x + 1;
-#                         }
+                        if (x == 1) {
+                          x = x + 1;
+                        }
 
-#                         println(x);
-#                       }
-#                     output: |
-#                       2
-#                   - name: expression true so no side effect
-#                     input: |
-#                       fun main() {
-#                         let x = 1;
+                        println(x);
+                      }
+                    output: |
+                      2
+                  - name: expression true so no side effect
+                    input: |
+                      fun main() {
+                        let x = 1;
 
-#                         if (x == 0) {
-#                           x = x + 1;
-#                         }
+                        if (x == 0) {
+                          x = x + 1;
+                        }
 
-#                         println(x);
-#                       }
-#                     output: |
-#                       1
-#             - scenario:
-#                 name: With else
-#                 tests:
-#                   - name: true branch side effect
-#                     input: |
-#                       fun main() {
-#                         let x = 1;
+                        println(x);
+                      }
+                    output: |
+                      1
+            - scenario:
+                name: With else
+                tests:
+                  - name: true branch side effect
+                    input: |
+                      fun main() {
+                        let x = 1;
 
-#                         if (x == 1) {
-#                           x = x + 1;
-#                         } else {
-#                           x = x * 10;
-#                         }
+                        if (x == 1) {
+                          x = x + 1;
+                        } else {
+                          x = x * 10;
+                        }
 
-#                         println(x);
-#                       }
-#                     output: |
-#                       2
-#                   - name: else branch side effect
-#                     input: |
-#                       fun main() {
-#                         let x = 1;
+                        println(x);
+                      }
+                    output: |
+                      2
+                  - name: else branch side effect
+                    input: |
+                      fun main() {
+                        let x = 1;
 
-#                         if (x == 0) {
-#                           x = x + 1;
-#                         } else {
-#                           x = x * 10;
-#                         }
+                        if (x == 0) {
+                          x = x + 1;
+                        } else {
+                          x = x * 10;
+                        }
 
-#                         println(x);
-#                       }
-#                     output: |
-#                       10
+                        println(x);
+                      }
+                    output: |
+                      10
 #       - scenario:
 #           name: While Statement
 #           tests:

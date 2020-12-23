@@ -143,6 +143,39 @@ const compileS = (
     const e = compileE(s.e, functionBuilder);
     const op = functionBuilder.operand(s.n);
     functionBuilder.store(op, undefined, e);
+  } else if (s.tag === "IfThenElseStatement") {
+    if (s.s2 === undefined) {
+      const thenBlock = functionBuilder.newLabel("then");
+      const mergeBlock = functionBuilder.newLabel("merge");
+
+      const e = compileE(s.e, functionBuilder);
+
+      functionBuilder.condBr(e, thenBlock, mergeBlock);
+
+      functionBuilder.label(thenBlock);
+      compileS(s.s1, functionBuilder);
+      functionBuilder.br(mergeBlock);
+
+      functionBuilder.label(mergeBlock);
+    } else {
+      const thenBlock = functionBuilder.newLabel("then");
+      const elseBlock = functionBuilder.newLabel("else");
+      const mergeBlock = functionBuilder.newLabel("merge");
+
+      const e = compileE(s.e, functionBuilder);
+
+      functionBuilder.condBr(e, thenBlock, elseBlock);
+
+      functionBuilder.label(thenBlock);
+      compileS(s.s1, functionBuilder);
+      functionBuilder.br(mergeBlock);
+
+      functionBuilder.label(elseBlock);
+      compileS(s.s2, functionBuilder);
+      functionBuilder.br(mergeBlock);
+
+      functionBuilder.label(mergeBlock);
+    }
   } else if (s.tag === "BlockStatement") {
     compileSS(s.ss, functionBuilder);
   } else if (s.tag === "CallStatement") {
