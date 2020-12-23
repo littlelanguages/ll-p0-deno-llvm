@@ -1,13 +1,15 @@
-import * as IR from "./ir.ts";
+import * as IRModule from "./ir/module.ts";
 import { exec, IExecResponse, OutputMode } from "../../deps/exec.ts";
 
 export const write = (
-  module: IR.Module,
+  module: IRModule.Module,
   fileName: string,
 ): Promise<void> =>
   Deno
     .create(fileName)
-    .then((f) => IR.write(module, IR.textWriter(f)).then(() => f.close()));
+    .then((f) =>
+      IRModule.write(module, IRModule.textWriter(f)).then(() => f.close())
+    );
 
 export const assemble = (
   sourceFileName: string,

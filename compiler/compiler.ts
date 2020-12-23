@@ -1,8 +1,14 @@
 import * as TST from "../dynamic/tst.ts";
-import * as IR from "./llvm/ir.ts";
+import * as IROperand from "./llvm/ir/operand.ts";
+import * as IRModule from "./llvm/ir/module.ts";
+import * as IRInstruction from "./llvm/ir/instruction.ts";
+import * as IRType from "./llvm/ir/type.ts";
 import * as Builders from "./llvm/builders.ts";
 
-export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
+export const compile = (
+  tst: TST.Program,
+  name: string = "p0",
+): IRModule.Module => {
   const moduleBuilder = Object.assign(
     Builders.module(name),
     {
@@ -15,7 +21,7 @@ export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
       closeScope: function () {
         this.operands.pop();
       },
-      operand: function (name: string): IR.Operand {
+      operand: function (name: string): IROperand.Operand {
         for (let lp = this.operands.length - 1; lp >= 0; lp -= 1) {
           const potentialResult = this.operands[lp].get(name);
           if (potentialResult !== undefined) {
@@ -24,18 +30,22 @@ export const compile = (tst: TST.Program, name: string = "p0"): IR.Module => {
         }
         throw new Error(`Internal Error: operand: ${name}`);
       },
-      registerOperand: function (name: string, op: IR.Operand) {
+      registerOperand: function (name: string, op: IROperand.Operand) {
         this.operands[this.operands.length - 1].set(name, op);
       },
     },
   );
 
   moduleBuilder
-    .declareExternal("@_print_bool", [IR.i8], IR.voidType)
-    .declareExternal("@_print_int", [IR.i32], IR.voidType)
-    .declareExternal("@_print_string", [IR.pointerType(IR.i8)], IR.voidType)
-    .declareExternal("@_print_float", [IR.floatFP], IR.voidType)
-    .declareExternal("@_print_ln", [], IR.voidType);
+    .declareExternal("@_print_bool", [IRType.i8], IRType.voidType)
+    .declareExternal("@_print_int", [IRType.i32], IRType.voidType)
+    .declareExternal(
+      "@_print_string",
+      [IRType.pointerType(IRType.i8)],
+      IRType.voidType,
+    )
+    .declareExternal("@_print_float", [IRType.floatFP], IRType.voidType)
+    .declareExternal("@_print_ln", [], IRType.voidType);
 
   compileDS(tst.d, moduleBuilder);
 
@@ -54,12 +64,14 @@ const compileD = (
   moduleBuilder: ModuleBuilder,
 ) => {
   if (d.tag === "FunctionDeclaration") {
-    const ps: Array<[string, IR.Type]> = d.ps.map((p) => [p.n, toType(p.t)]);
+    const ps: Array<[string, IRType.Type]> = d.ps.map((
+      p,
+    ) => [p.n, toType(p.t)]);
 
     const functionBuilder = declareFunction(
       `@${d.n}`,
       ps,
-      d.e === undefined ? IR.voidType : toType(typeOf(d.e)),
+      d.e === undefined ? IRType.voidType : toType(typeOf(d.e)),
       moduleBuilder,
     );
 
@@ -87,7 +99,7 @@ const compileD = (
   } else if (
     d.tag === "ConstantDeclaration" || d.tag === "VariableDeclaration"
   ) {
-    const v: IR.Constant = (d.e.tag === "LiteralInt")
+    const v: IROperand.Constant = (d.e.tag === "LiteralInt")
       ? { tag: "CInt", bits: 32, value: d.e.v }
       : (d.e.tag === "LiteralBool")
       ? { tag: "CInt", bits: 1, value: d.e.v ? 1 : 0 }
@@ -108,7 +120,7 @@ const compileD = (
       d.identifier,
       {
         tag: "CGlobalReference",
-        type: IR.pointerType(type),
+        type: IRType.pointerType(type),
         name: `@${d.identifier}`,
       },
     );
@@ -119,7 +131,12 @@ const compileMain = (
   tst: TST.Program,
   moduleBuilder: ModuleBuilder,
 ) => {
-  const functionBuilder = declareFunction("@main", [], IR.i32, moduleBuilder);
+  const functionBuilder = declareFunction(
+    "@main",
+    [],
+    IRType.i32,
+    moduleBuilder,
+  );
 
   compileS(tst.s, functionBuilder);
 
@@ -145,7 +162,7 @@ const compileS = (
     s.tag === "VariableDeclarationStatement"
   ) {
     const e = compileE(s.e, functionBuilder);
-    const op = functionBuilder.alloca(IR.typeOf(e), undefined);
+    const op = functionBuilder.alloca(IROperand.typeOf(e), undefined);
     functionBuilder.store(op, undefined, e);
     functionBuilder.registerOperand(s.n, op);
   } else if (s.tag === "AssignmentStatement") {
@@ -236,7 +253,7 @@ const compilePrintStatement = (
 
     functionBuilder.callvoid(
       name,
-      [et === TST.Type.Bool ? functionBuilder.zext(IR.i8, eo) : eo],
+      [et === TST.Type.Bool ? functionBuilder.zext(IRType.i8, eo) : eo],
     );
   });
 };
@@ -244,7 +261,7 @@ const compilePrintStatement = (
 const compileE = (
   e: TST.Expression,
   functionBuilder: FunctionBuilder,
-): IR.Operand => {
+): IROperand.Operand => {
   if (e.tag === "LiteralInt") {
     return { tag: "CInt", bits: 32, value: e.v };
   } else if (e.tag === "LiteralBool") {
@@ -259,11 +276,11 @@ const compileE = (
 
       functionBuilder.declareGlobal(
         name,
-        IR.arrayType(e.v.length + 1, IR.i8),
+        IRType.arrayType(e.v.length + 1, IRType.i8),
         true,
         {
           tag: "CArray",
-          memberType: IR.i8,
+          memberType: IRType.i8,
           values: [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((
             c,
           ) => ({
@@ -275,7 +292,7 @@ const compileE = (
       );
       op = {
         tag: "CGlobalReference",
-        type: IR.pointerType(IR.arrayType(e.v.length + 1, IR.i8)),
+        type: IRType.pointerType(IRType.arrayType(e.v.length + 1, IRType.i8)),
         name: name,
       };
 
@@ -284,8 +301,8 @@ const compileE = (
 
     return functionBuilder.getElementPointer(
       true,
-      IR.pointerType(IR.i8),
-      IR.arrayType(e.v.length + 1, IR.i8),
+      IRType.pointerType(IRType.i8),
+      IRType.arrayType(e.v.length + 1, IRType.i8),
       op,
       [
         { tag: "CInt", bits: 32, value: 0 },
@@ -335,28 +352,28 @@ const compileE = (
       return functionBuilder.or(e1, e2);
     } else if (e.op === TST.BinaryOp.Equal) {
       return (typeOf(e.e1) === TST.Type.Float)
-        ? functionBuilder.fcmp(IR.FP.OEQ, e1, e2)
-        : functionBuilder.icmp(IR.IP.EQ, e1, e2);
+        ? functionBuilder.fcmp(IRInstruction.FP.OEQ, e1, e2)
+        : functionBuilder.icmp(IRInstruction.IP.EQ, e1, e2);
     } else if (e.op === TST.BinaryOp.NotEqual) {
       return (typeOf(e.e1) === TST.Type.Float)
-        ? functionBuilder.fcmp(IR.FP.ONE, e1, e2)
-        : functionBuilder.icmp(IR.IP.NQ, e1, e2);
+        ? functionBuilder.fcmp(IRInstruction.FP.ONE, e1, e2)
+        : functionBuilder.icmp(IRInstruction.IP.NQ, e1, e2);
     } else if (e.op === TST.BinaryOp.LessThan) {
       return (typeOf(e.e1) === TST.Type.Float)
-        ? functionBuilder.fcmp(IR.FP.OLT, e1, e2)
-        : functionBuilder.icmp(IR.IP.SLT, e1, e2);
+        ? functionBuilder.fcmp(IRInstruction.FP.OLT, e1, e2)
+        : functionBuilder.icmp(IRInstruction.IP.SLT, e1, e2);
     } else if (e.op === TST.BinaryOp.LessEqual) {
       return (typeOf(e.e1) === TST.Type.Float)
-        ? functionBuilder.fcmp(IR.FP.OLE, e1, e2)
-        : functionBuilder.icmp(IR.IP.SLE, e1, e2);
+        ? functionBuilder.fcmp(IRInstruction.FP.OLE, e1, e2)
+        : functionBuilder.icmp(IRInstruction.IP.SLE, e1, e2);
     } else if (e.op === TST.BinaryOp.GreaterThan) {
       return (typeOf(e.e1) === TST.Type.Float)
-        ? functionBuilder.fcmp(IR.FP.OGT, e1, e2)
-        : functionBuilder.icmp(IR.IP.SGT, e1, e2);
+        ? functionBuilder.fcmp(IRInstruction.FP.OGT, e1, e2)
+        : functionBuilder.icmp(IRInstruction.IP.SGT, e1, e2);
     } else if (e.op === TST.BinaryOp.GreaterEqual) {
       return (typeOf(e.e1) === TST.Type.Float)
-        ? functionBuilder.fcmp(IR.FP.OGE, e1, e2)
-        : functionBuilder.icmp(IR.IP.SGE, e1, e2);
+        ? functionBuilder.fcmp(IRInstruction.FP.OGE, e1, e2)
+        : functionBuilder.icmp(IRInstruction.IP.SGE, e1, e2);
     } else if (e.op === TST.BinaryOp.Plus) {
       return (typeOf(e.e1) === TST.Type.Float)
         ? functionBuilder.fadd(e1, e2)
@@ -414,25 +431,25 @@ const typeOf = (
   }
 };
 
-const toType = (t: TST.Type): IR.Type =>
+const toType = (t: TST.Type): IRType.Type =>
   t === TST.Type.Bool
-    ? IR.i1
+    ? IRType.i1
     : t === TST.Type.Float
-    ? IR.floatFP
+    ? IRType.floatFP
     : t === TST.Type.Int
-    ? IR.i32
+    ? IRType.i32
     : t === TST.Type.String
-    ? IR.pointerType(IR.i8)
-    : IR.i32;
+    ? IRType.pointerType(IRType.i8)
+    : IRType.i32;
 
 interface CodegenState {
-  operands: Array<Map<string, IR.Operand>>;
-  strings: Map<string, IR.Operand>;
+  operands: Array<Map<string, IROperand.Operand>>;
+  strings: Map<string, IROperand.Operand>;
 
   openScope: () => void;
   closeScope: () => void;
-  operand: (name: string) => IR.Operand;
-  registerOperand: (name: string, op: IR.Operand) => void;
+  operand: (name: string) => IROperand.Operand;
+  registerOperand: (name: string, op: IROperand.Operand) => void;
 }
 
 type ModuleBuilder = Builders.ModuleBuilder & CodegenState;
@@ -440,8 +457,8 @@ type FunctionBuilder = Builders.FunctionBuilder & CodegenState;
 
 const declareFunction = (
   name: string,
-  args: Array<[string, IR.Type]>,
-  result: IR.Type,
+  args: Array<[string, IRType.Type]>,
+  result: IRType.Type,
   moduleBuilder: ModuleBuilder,
 ): FunctionBuilder =>
   Object.assign(
@@ -453,7 +470,7 @@ const declareFunction = (
       openScope: () => moduleBuilder.openScope(),
       closeScope: () => moduleBuilder.closeScope(),
       operand: (name: string) => moduleBuilder.operand(name),
-      registerOperand: (name: string, op: IR.Operand) =>
+      registerOperand: (name: string, op: IROperand.Operand) =>
         moduleBuilder.registerOperand(name, op),
     },
   );
