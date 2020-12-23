@@ -76,7 +76,7 @@ const compileD = (
     );
 
     functionBuilder.openScope();
-    ps.forEach((p, index) => {
+    ps.forEach((p) => {
       const op = functionBuilder.alloca(p[1]);
       functionBuilder.store(op, IROperand.localReference(p[1], `%${p[0]}`));
       functionBuilder.registerOperand(p[0], op);
@@ -248,17 +248,13 @@ const compileE = (
   if (e.tag === "UnaryExpression") {
     const op = compileE(e.e, functionBuilder);
 
-    if (e.op === TST.UnaryOp.UnaryPlus) {
-      return op;
-    } else if (e.op === TST.UnaryOp.UnaryMinus) {
-      if (typeOf(e.e) === TST.Type.Float) {
-        return functionBuilder.fsub(IROperand.cfloatFP(0.0), op);
-      } else {
-        return functionBuilder.sub(IROperand.cint(32, 0), op);
-      }
-    } else {
-      return functionBuilder.xor(op, IROperand.cint(1, 1));
-    }
+    return e.op === TST.UnaryOp.UnaryNot
+      ? functionBuilder.xor(op, IROperand.cint(1, 1))
+      : e.op === TST.UnaryOp.UnaryPlus
+      ? op
+      : typeOf(e.e) === TST.Type.Float
+      ? functionBuilder.fsub(IROperand.cfloatFP(0.0), op)
+      : functionBuilder.sub(IROperand.cint(32, 0), op);
   } else if (e.tag === "TernaryExpression") {
     const thenBlock = functionBuilder.newLabel("then");
     const elseBlock = functionBuilder.newLabel("else");
@@ -338,28 +334,24 @@ const compileE = (
       e.args.map((e) => compileE(e, functionBuilder)),
     );
   } else if (e.tag === "LiteralString") {
-    let op = functionBuilder.strings.get(e.v);
+    const type = IRType.arrayType(e.v.length + 1, IRType.i8);
 
+    let op = functionBuilder.strings.get(e.v);
     if (op === undefined) {
       const name = `@_${functionBuilder.strings.size}.str`;
 
       functionBuilder.declareGlobal(
         name,
-        IRType.arrayType(e.v.length + 1, IRType.i8),
+        type,
         true,
-        {
-          tag: "CArray",
-          memberType: IRType.i8,
-          values: [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((c) =>
+        IROperand.carray(
+          IRType.i8,
+          [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((c) =>
             IROperand.cint(8, c)
           ),
-        },
+        ),
       );
-      op = {
-        tag: "CGlobalReference",
-        type: IRType.pointerType(IRType.arrayType(e.v.length + 1, IRType.i8)),
-        name: name,
-      };
+      op = IROperand.cglobalReference(IRType.pointerType(type), name);
 
       functionBuilder.strings.set(name, op);
     }
@@ -367,7 +359,7 @@ const compileE = (
     return functionBuilder.getElementPointer(
       true,
       IRType.pointerType(IRType.i8),
-      IRType.arrayType(e.v.length + 1, IRType.i8),
+      type,
       op,
       [IROperand.cint(32, 0), IROperand.cint(32, 0)],
     );
