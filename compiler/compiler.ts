@@ -53,13 +53,13 @@ const compileD = (
   d: TST.Declaration,
   moduleBuilder: ModuleBuilder,
 ) => {
-  if (d.tag === "FunctionDeclaration" && d.e !== undefined) {
+  if (d.tag === "FunctionDeclaration") {
     const ps: Array<[string, IR.Type]> = d.ps.map((p) => [p.n, toType(p.t)]);
 
     const functionBuilder = declareFunction(
       `@${d.n}`,
       ps,
-      toType(typeOf(d.e)),
+      d.e === undefined ? IR.voidType : toType(typeOf(d.e)),
       moduleBuilder,
     );
 
@@ -75,35 +75,14 @@ const compileD = (
     });
 
     d.ss.forEach((s) => compileS(s, functionBuilder));
-    const op = compileE(d.e, functionBuilder);
-    functionBuilder.ret(op);
+
+    if (d.e === undefined) {
+      functionBuilder.retvoid();
+    } else {
+      const op = compileE(d.e, functionBuilder);
+      functionBuilder.ret(op);
+    }
     functionBuilder.closeScope();
-    functionBuilder.build();
-  } else if (d.tag === "FunctionDeclaration" && d.e === undefined) {
-    const ps: Array<[string, IR.Type]> = d.ps.map((p) => [p.n, toType(p.t)]);
-
-    const functionBuilder = declareFunction(
-      `@${d.n}`,
-      ps,
-      IR.voidType,
-      moduleBuilder,
-    );
-
-    functionBuilder.openScope();
-    ps.forEach((p, index) => {
-      const op = functionBuilder.alloca(p[1], undefined);
-      functionBuilder.store(
-        op,
-        undefined,
-        { tag: "LocalReference", type: p[1], name: `%${p[0]}` },
-      );
-      functionBuilder.registerOperand(p[0], op);
-    });
-
-    d.ss.forEach((s) => compileS(s, functionBuilder));
-    functionBuilder.retvoid();
-    functionBuilder.closeScope();
-
     functionBuilder.build();
   } else if (
     d.tag === "ConstantDeclaration" || d.tag === "VariableDeclaration"
@@ -133,8 +112,6 @@ const compileD = (
         name: `@${d.identifier}`,
       },
     );
-  } else {
-    throw Error(`TODO: d: ${d.tag}: ${JSON.stringify(d, null, 2)}`);
   }
 };
 
