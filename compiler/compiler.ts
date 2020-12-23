@@ -176,6 +176,22 @@ const compileS = (
 
       functionBuilder.label(mergeBlock);
     }
+  } else if (s.tag === "WhileStatement") {
+    const whileBlock = functionBuilder.newLabel("while");
+    const bodyBlock = functionBuilder.newLabel("body");
+    const mergeBlock = functionBuilder.newLabel("merge");
+
+    functionBuilder.br(whileBlock);
+    functionBuilder.label(whileBlock);
+    const e = compileE(s.e, functionBuilder);
+
+    functionBuilder.condBr(e, bodyBlock, mergeBlock);
+
+    functionBuilder.label(bodyBlock);
+    compileS(s.s, functionBuilder);
+    functionBuilder.br(whileBlock);
+
+    functionBuilder.label(mergeBlock);
   } else if (s.tag === "BlockStatement") {
     compileSS(s.ss, functionBuilder);
   } else if (s.tag === "CallStatement") {

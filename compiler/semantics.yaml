@@ -637,38 +637,38 @@
                       }
                     output: |
                       10
-#       - scenario:
-#           name: While Statement
-#           tests:
-#             - name: falls through immediately
-#               input: |
-#                 fun main() {
-#                   let x = 1;
+      - scenario:
+          name: While Statement
+          tests:
+            - name: falls through immediately
+              input: |
+                fun main() {
+                  let x = 1;
 
-#                   while (x < 0) {
-#                     x = x + 1;
-#                   }
+                  while (x < 0) {
+                    x = x + 1;
+                  }
 
-#                   println(x);
-#                 }
-#               output: |
-#                 1
-#             - name: iterates
-#               input: |
-#                 fun main() {
-#                   let x = 0;
-#                   const n = 100;
-#                   let result = 0;
+                  println(x);
+                }
+              output: |
+                1
+            - name: iterates
+              input: |
+                fun main() {
+                  let x = 0;
+                  const n = 100;
+                  let result = 0;
 
-#                   while (x <= n) {
-#                     result = result + x;
-#                     x = x + 1;
-#                   }
+                  while (x <= n) {
+                    result = result + x;
+                    x = x + 1;
+                  }
 
-#                   println(result);
-#                 }
-#               output: |
-#                 5050
+                  println(result);
+                }
+              output: |
+                5050
 #       - scenario:
 #           name: Call Statement
 #           tests:
