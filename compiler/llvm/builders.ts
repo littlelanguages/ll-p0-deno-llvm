@@ -212,14 +212,9 @@ const functionBuilder = (
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
   ): IROperand.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
     this.instructions.push({ tag: "IAdd", result, operand0, operand1 });
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   alloca: function (
@@ -227,16 +222,10 @@ const functionBuilder = (
     alignment: number | undefined,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push(
       { tag: "IAlloca", result, type, alignment },
     );
-
-    return {
-      tag: "LocalReference",
-      type: IRType.pointerType(type),
-      name: result,
-    };
+    return IROperand.localReference(IRType.pointerType(type), result);
   },
 
   and: function (
@@ -244,14 +233,8 @@ const functionBuilder = (
     operand1: IROperand.Operand,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IAnd", result, operand0, operand1 });
-
-    return {
-      tag: "LocalReference",
-      type: IRType.i1,
-      name: result,
-    };
+    return IROperand.localReference(IRType.i1, result);
   },
 
   br: function (label: string) {
@@ -264,12 +247,10 @@ const functionBuilder = (
     args: Array<IROperand.Operand>,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push(
       { tag: "ICall", result, type, name, arguments: args },
     );
-
-    return { tag: "LocalReference", type, name: result };
+    return IROperand.localReference(type, result);
   },
 
   callvoid: function (name: string, args: Array<IROperand.Operand>) {
@@ -287,14 +268,8 @@ const functionBuilder = (
     operand1: IROperand.Operand,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IFAdd", result, operand0, operand1 });
-
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   fcmp: function (
@@ -303,14 +278,8 @@ const functionBuilder = (
     operand1: IROperand.Operand,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IFCmp", result, op, operand0, operand1 });
-
-    return {
-      tag: "LocalReference",
-      type: IRType.i1,
-      name: result,
-    };
+    return IROperand.localReference(IRType.i1, result);
   },
 
   fdiv: function (
@@ -318,42 +287,26 @@ const functionBuilder = (
     operand1: IROperand.Operand,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IFDiv", result, operand0, operand1 });
-
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   fmul: function (
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
   ): IROperand.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
     this.instructions.push({ tag: "IFMul", result, operand0, operand1 });
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   fsub: function (
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
   ): IROperand.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
     this.instructions.push({ tag: "IFSub", result, operand0, operand1 });
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   getElementPointer: function (
@@ -364,6 +317,7 @@ const functionBuilder = (
     indices: Array<IROperand.Constant>,
   ): IROperand.Operand {
     const result = this.newRegister();
+
     this.instructions.push(
       {
         tag: "IGetElementPointer",
@@ -376,7 +330,7 @@ const functionBuilder = (
       },
     );
 
-    return { tag: "LocalReference", type, name: result };
+    return IROperand.localReference(type, result);
   },
 
   icmp: function (
@@ -385,14 +339,8 @@ const functionBuilder = (
     operand1: IROperand.Operand,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IICmp", result, op, operand0, operand1 });
-
-    return {
-      tag: "LocalReference",
-      type: IRType.i1,
-      name: result,
-    };
+    return IROperand.localReference(IRType.i1, result);
   },
 
   label: function (name: string) {
@@ -405,28 +353,17 @@ const functionBuilder = (
     alignment: number | undefined,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "ILoad", result, type, operand, alignment });
-
-    return {
-      tag: "LocalReference",
-      type,
-      name: result,
-    };
+    return IROperand.localReference(type, result);
   },
 
   mul: function (
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
   ): IROperand.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
     this.instructions.push({ tag: "IMul", result, operand0, operand1 });
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   or: function (
@@ -434,28 +371,16 @@ const functionBuilder = (
     operand1: IROperand.Operand,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IOr", result, operand0, operand1 });
-
-    return {
-      tag: "LocalReference",
-      type: IRType.i1,
-      name: result,
-    };
+    return IROperand.localReference(IRType.i1, result);
   },
 
   phi: function (
     incoming: Array<[op: IROperand.Operand, label: string]>,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IPhi", result, incoming });
-
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(incoming[0][0]),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(incoming[0][0]), result);
   },
 
   ret: function (c: IROperand.Constant) {
@@ -470,14 +395,9 @@ const functionBuilder = (
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
   ): IROperand.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
     this.instructions.push({ tag: "ISDiv", result, operand0, operand1 });
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   store: function (
@@ -492,14 +412,9 @@ const functionBuilder = (
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
   ): IROperand.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
     this.instructions.push({ tag: "ISub", result, operand0, operand1 });
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   xor: function (
@@ -507,24 +422,17 @@ const functionBuilder = (
     operand1: IROperand.Operand,
   ): IROperand.Operand {
     const result = this.newRegister();
-
     this.instructions.push({ tag: "IXor", result, operand0, operand1 });
-
-    return {
-      tag: "LocalReference",
-      type: IROperand.typeOf(operand0),
-      name: result,
-    };
+    return IROperand.localReference(IROperand.typeOf(operand0), result);
   },
 
   zext: function (
     type: IRType.Type,
     operand: IROperand.Operand,
   ): IROperand.Operand {
-    const result = `%${this.registerCount}`;
-    this.registerCount += 1;
+    const result = this.newRegister();
     this.instructions.push({ tag: "IZext", type, result, operand });
-    return { tag: "LocalReference", type, name: result };
+    return IROperand.localReference(type, result);
   },
 
   declareGlobal: (

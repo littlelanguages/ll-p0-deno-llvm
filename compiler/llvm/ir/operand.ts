@@ -4,99 +4,97 @@ import * as IRType from "./type.ts";
 
 export type Operand = LocalReference | Constant;
 
-export type LocalReference = {
+type LocalReference = {
   tag: "LocalReference";
   type: IRType.Type;
   name: string;
 };
+
+export const localReference = (
+  type: IRType.Type,
+  name: string,
+): LocalReference => ({ tag: "LocalReference", type, name });
 
 export type Constant =
   | CInt
   | CHalfFP
   | CFloatFP
   | CArray
-  | CAdd
-  | CFAdd
-  | CGetElementPtr
-  | CGlobalReference
-  | CZext;
+  | CGlobalReference;
 
-export type CInt = {
+type CInt = {
   tag: "CInt";
   bits: number;
   value: number;
 };
 
-export type CHalfFP = {
+export const cint = (bits: number, value: number): CInt => ({
+  tag: "CInt",
+  bits,
+  value,
+});
+
+type CHalfFP = {
   tag: "CHalfFP";
   value: number;
 };
 
-export type CFloatFP = {
+export const chalfFP = (value: number): CHalfFP => ({
+  tag: "CHalfFP",
+  value,
+});
+
+type CFloatFP = {
   tag: "CFloatFP";
   value: number;
 };
 
-export type CArray = {
+export const cfloatFP = (value: number): CFloatFP => ({
+  tag: "CFloatFP",
+  value,
+});
+
+type CArray = {
   tag: "CArray";
   memberType: IRType.Type;
   values: Array<Constant>;
 };
 
-export type CAdd = {
-  tag: "CAdd";
-  nsw: boolean;
-  nuw: boolean;
-  operand0: Constant;
-  operand1: Constant;
-};
+export const carray = (
+  memberType: IRType.Type,
+  values: Array<Constant>,
+): CArray => ({
+  tag: "CArray",
+  memberType,
+  values,
+});
 
-export type CFAdd = {
-  tag: "CFAdd";
-  operand0: Constant;
-  operand1: Constant;
-};
-
-export type CGlobalReference = {
+type CGlobalReference = {
   tag: "CGlobalReference";
   type: IRType.Type;
   name: string;
 };
 
-export type CGetElementPtr = {
-  tag: "CGetElementPtr";
-  inBounds: boolean;
-  type: IRType.Type;
-  elementType: IRType.Type;
-  address: Constant;
-  indices: Array<Constant>;
-};
-
-export type CZext = {
-  tag: "Czext";
-  operand: Operand;
-  type: IRType.Type;
-};
+export const cglobalReference = (
+  type: IRType.Type,
+  name: string,
+): CGlobalReference => ({
+  tag: "CGlobalReference",
+  type,
+  name,
+});
 
 export const typeOf = (o: Operand): IRType.Type =>
-  o.tag === "CAdd"
-    ? typeOf(o.operand0)
-    : o.tag === "CArray"
+  o.tag === "CArray"
     ? IRType.pointerType(o.memberType)
-    : o.tag === "CFAdd"
-    ? typeOf(o.operand0)
     : o.tag === "CHalfFP"
     ? IRType.halfFP
     : o.tag === "CFloatFP"
     ? IRType.floatFP
-    : o.tag === "CGetElementPtr"
-    ? o.type
     : o.tag === "CGlobalReference"
     ? o.type
     : o.tag === "CInt"
     ? IRType.integerType(o.bits)
-    : o.tag === "Czext"
-    ? o.type
     : o.tag === "LocalReference"
     ? o.type
     : IRType.i1;
@@ -108,16 +106,8 @@ export const toUntypedString = (op: Operand): string =>
     ? floatToString(op.value)
     : op.tag === "CArray"
     ? `[${op.values.map(toString).join(", ")}]`
-    : op.tag === "CGetElementPtr"
-    ? `getelementptr${op.inBounds ? " inbounds" : ""}(${
-      IRType.toString(op.elementType)
-    }, ${toString(op.address)}${
-      op.indices.map((i) => `, ${toString(i)}`).join("")
-    })`
     : op.tag === "CGlobalReference"
     ? `${op.name}`
-    : op.tag === "Czext"
-    ? `zext (${toString(op.operand)} to ${IRType.toString(op.type)})`
     : op.tag === "LocalReference"
     ? op.name
     : (function () {
@@ -131,18 +121,8 @@ export const toString = (op: Operand): string =>
     ? `float ${floatToString(op.value)}`
     : op.tag === "CArray"
     ? `[${op.values.map(toString).join(", ")}]`
-    : op.tag === "CGetElementPtr"
-    ? `${IRType.toString(op.type)} getelementptr${
-      op.inBounds ? " inbounds" : ""
-    }(${IRType.toString(op.elementType)}, ${toString(op.address)}${
-      op.indices.map((i) => `, ${toString(i)}`).join("")
-    })`
     : op.tag === "CGlobalReference"
     ? `${IRType.toString(op.type)} ${op.name}`
-    : op.tag === "Czext"
-    ? `${IRType.toString(op.type)} zext (${toString(op.operand)} to ${
-      IRType.toString(op.type)
-    })`
     : op.tag === "LocalReference"
     ? `${IRType.toString(op.type)} ${op.name}`
     : (function () {

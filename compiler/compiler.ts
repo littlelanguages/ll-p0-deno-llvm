@@ -81,7 +81,7 @@ const compileD = (
       functionBuilder.store(
         op,
         undefined,
-        { tag: "LocalReference", type: p[1], name: `%${p[0]}` },
+        IROperand.localReference(p[1], `%${p[0]}`),
       );
       functionBuilder.registerOperand(p[0], op);
     });
@@ -100,11 +100,11 @@ const compileD = (
     d.tag === "ConstantDeclaration" || d.tag === "VariableDeclaration"
   ) {
     const v: IROperand.Constant = (d.e.tag === "LiteralInt")
-      ? { tag: "CInt", bits: 32, value: d.e.v }
+      ? IROperand.cint(32, d.e.v)
       : (d.e.tag === "LiteralBool")
-      ? { tag: "CInt", bits: 1, value: d.e.v ? 1 : 0 }
+      ? IROperand.cint(1, d.e.v ? 1 : 0)
       : (d.e.tag === "LiteralFloat")
-      ? { tag: "CFloatFP", value: d.e.v }
+      ? IROperand.cfloatFP(d.e.v)
       : (() => {
         throw new Error(
           `Internal Error: declaration: ${d.tag}: ${
@@ -118,11 +118,7 @@ const compileD = (
     moduleBuilder.declareGlobal(`@${d.identifier}`, type, false, v);
     moduleBuilder.registerOperand(
       d.identifier,
-      {
-        tag: "CGlobalReference",
-        type: IRType.pointerType(type),
-        name: `@${d.identifier}`,
-      },
+      IROperand.cglobalReference(IRType.pointerType(type), `@${d.identifier}`),
     );
   }
 };
@@ -140,7 +136,7 @@ const compileMain = (
 
   compileS(tst.s, functionBuilder);
 
-  functionBuilder.ret({ tag: "CInt", bits: 32, value: 0 });
+  functionBuilder.ret(IROperand.cint(32, 0));
   functionBuilder.build();
 };
 
@@ -263,9 +259,9 @@ const compileE = (
   functionBuilder: FunctionBuilder,
 ): IROperand.Operand => {
   if (e.tag === "LiteralInt") {
-    return { tag: "CInt", bits: 32, value: e.v };
+    return IROperand.cint(32, e.v);
   } else if (e.tag === "LiteralBool") {
-    return { tag: "CInt", bits: 1, value: e.v ? 1 : 0 };
+    return IROperand.cint(1, e.v ? 1 : 0);
   } else if (e.tag === "LiteralFloat") {
     return { tag: "CFloatFP", value: e.v };
   } else if (e.tag === "LiteralString") {
@@ -281,13 +277,9 @@ const compileE = (
         {
           tag: "CArray",
           memberType: IRType.i8,
-          values: [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((
-            c,
-          ) => ({
-            tag: "CInt",
-            bits: 8,
-            value: c,
-          })),
+          values: [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((c) =>
+            IROperand.cint(8, c)
+          ),
         },
       );
       op = {
@@ -304,10 +296,7 @@ const compileE = (
       IRType.pointerType(IRType.i8),
       IRType.arrayType(e.v.length + 1, IRType.i8),
       op,
-      [
-        { tag: "CInt", bits: 32, value: 0 },
-        { tag: "CInt", bits: 32, value: 0 },
-      ],
+      [IROperand.cint(32, 0), IROperand.cint(32, 0)],
     );
   } else if (e.tag === "UnaryExpression") {
     const op = compileE(e.e, functionBuilder);
@@ -316,12 +305,12 @@ const compileE = (
       return op;
     } else if (e.op === TST.UnaryOp.UnaryMinus) {
       if (typeOf(e.e) === TST.Type.Float) {
-        return functionBuilder.fsub({ tag: "CFloatFP", value: 0.0 }, op);
+        return functionBuilder.fsub(IROperand.cfloatFP(0.0), op);
       } else {
-        return functionBuilder.sub({ tag: "CInt", bits: 32, value: 0 }, op);
+        return functionBuilder.sub(IROperand.cint(32, 0), op);
       }
     } else {
-      return functionBuilder.xor(op, { tag: "CInt", bits: 1, value: 1 });
+      return functionBuilder.xor(op, IROperand.cint(1, 1));
     }
   } else if (e.tag === "TernaryExpression") {
     const thenBlock = functionBuilder.newLabel("then");
