@@ -95,23 +95,14 @@ const compileD = (
   } else if (
     d.tag === "ConstantDeclaration" || d.tag === "VariableDeclaration"
   ) {
-    const v: IROperand.Constant = (d.e.tag === "LiteralInt")
-      ? IROperand.cint(32, d.e.v)
-      : (d.e.tag === "LiteralBool")
-      ? IROperand.cint(1, d.e.v ? 1 : 0)
-      : (d.e.tag === "LiteralFloat")
-      ? IROperand.cfloatFP(d.e.v)
-      : (() => {
-        throw new Error(
-          `Internal Error: declaration: ${d.tag}: ${
-            JSON.stringify(d, null, 2)
-          }`,
-        );
-      })();
-
     const type = toType(typeOf(d.e));
 
-    moduleBuilder.declareGlobal(`@${d.identifier}`, type, false, v);
+    moduleBuilder.declareGlobal(
+      `@${d.identifier}`,
+      type,
+      false,
+      compileLV(d.e),
+    );
     moduleBuilder.registerOperand(
       d.identifier,
       IROperand.cglobalReference(IRType.pointerType(type), `@${d.identifier}`),
@@ -254,47 +245,7 @@ const compileE = (
   e: TST.Expression,
   functionBuilder: FunctionBuilder,
 ): IROperand.Operand => {
-  if (e.tag === "LiteralInt") {
-    return IROperand.cint(32, e.v);
-  } else if (e.tag === "LiteralBool") {
-    return IROperand.cint(1, e.v ? 1 : 0);
-  } else if (e.tag === "LiteralFloat") {
-    return { tag: "CFloatFP", value: e.v };
-  } else if (e.tag === "LiteralString") {
-    let op = functionBuilder.strings.get(e.v);
-
-    if (op === undefined) {
-      const name = `@_${functionBuilder.strings.size}.str`;
-
-      functionBuilder.declareGlobal(
-        name,
-        IRType.arrayType(e.v.length + 1, IRType.i8),
-        true,
-        {
-          tag: "CArray",
-          memberType: IRType.i8,
-          values: [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((c) =>
-            IROperand.cint(8, c)
-          ),
-        },
-      );
-      op = {
-        tag: "CGlobalReference",
-        type: IRType.pointerType(IRType.arrayType(e.v.length + 1, IRType.i8)),
-        name: name,
-      };
-
-      functionBuilder.strings.set(name, op);
-    }
-
-    return functionBuilder.getElementPointer(
-      true,
-      IRType.pointerType(IRType.i8),
-      IRType.arrayType(e.v.length + 1, IRType.i8),
-      op,
-      [IROperand.cint(32, 0), IROperand.cint(32, 0)],
-    );
-  } else if (e.tag === "UnaryExpression") {
+  if (e.tag === "UnaryExpression") {
     const op = compileE(e.e, functionBuilder);
 
     if (e.op === TST.UnaryOp.UnaryPlus) {
@@ -380,14 +331,63 @@ const compileE = (
   } else if (e.tag === "IdentifierReference") {
     const op = functionBuilder.operand(e.n);
     return functionBuilder.load(toType(e.t), op);
-  } /* (e.tag === "CallExpression")*/ else {
+  } else if (e.tag === "CallExpression") {
     return functionBuilder.call(
       `@${e.n}`,
       toType(e.t),
       e.args.map((e) => compileE(e, functionBuilder)),
     );
+  } else if (e.tag === "LiteralString") {
+    let op = functionBuilder.strings.get(e.v);
+
+    if (op === undefined) {
+      const name = `@_${functionBuilder.strings.size}.str`;
+
+      functionBuilder.declareGlobal(
+        name,
+        IRType.arrayType(e.v.length + 1, IRType.i8),
+        true,
+        {
+          tag: "CArray",
+          memberType: IRType.i8,
+          values: [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((c) =>
+            IROperand.cint(8, c)
+          ),
+        },
+      );
+      op = {
+        tag: "CGlobalReference",
+        type: IRType.pointerType(IRType.arrayType(e.v.length + 1, IRType.i8)),
+        name: name,
+      };
+
+      functionBuilder.strings.set(name, op);
+    }
+
+    return functionBuilder.getElementPointer(
+      true,
+      IRType.pointerType(IRType.i8),
+      IRType.arrayType(e.v.length + 1, IRType.i8),
+      op,
+      [IROperand.cint(32, 0), IROperand.cint(32, 0)],
+    );
+  } else {
+    return compileLV(e);
   }
 };
+
+const compileLV = (lv: TST.LiteralValue): IROperand.Constant =>
+  lv.tag === "LiteralInt"
+    ? IROperand.cint(32, lv.v)
+    : lv.tag === "LiteralBool"
+    ? IROperand.cint(1, lv.v ? 1 : 0)
+    : lv.tag === "LiteralFloat"
+    ? IROperand.cfloatFP(lv.v)
+    : (() => {
+      throw new Error(
+        `Internal Error: lv: ${lv.tag}: ${JSON.stringify(lv, null, 2)}`,
+      );
+    })();
 
 const typeOf = (
   a: TST.LiteralValue | TST.Expression,
