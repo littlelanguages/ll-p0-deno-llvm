@@ -215,8 +215,6 @@ const compileS = (
         s.args.map((e) => compileE(e, functionBuilder)),
       );
     }
-  } else {
-    throw Error(`TODO: s: ${s.tag}: ${JSON.stringify(s, null, 2)}`);
   }
 };
 
@@ -226,10 +224,7 @@ const compilePrintStatement = (
 ) => {
   s.args.forEach((e) => {
     const et = typeOf(e);
-    let eo = compileE(e, functionBuilder);
-    if (et === TST.Type.Bool) {
-      eo = functionBuilder.zext(IR.i8, eo);
-    }
+    const eo = compileE(e, functionBuilder);
     const name = et ===
         TST.Type.Bool
       ? "@_print_bool"
@@ -239,7 +234,10 @@ const compilePrintStatement = (
       ? "@_print_string"
       : "@_print_float";
 
-    functionBuilder.callvoid(name, [eo]);
+    functionBuilder.callvoid(
+      name,
+      [et === TST.Type.Bool ? functionBuilder.zext(IR.i8, eo) : eo],
+    );
   });
 };
 
