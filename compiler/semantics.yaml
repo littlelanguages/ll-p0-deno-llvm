@@ -512,66 +512,66 @@
                 }
               output: |
                 625.000000
-      # - scenario:
-      #     name: Variable Declaration Statement
-      #     tests:
-      #       - name: Boolean
-      #         input: |
-      #           fun main() {
-      #             let value = true;
+      - scenario:
+          name: Variable Declaration Statement
+          tests:
+            - name: Boolean
+              input: |
+                fun main() {
+                  let value = true;
 
-      #             println(value);
-      #           }
-      #         output: |
-      #           true
-#             - name: Integer
-#               input: |
-#                 fun main() {
-#                   let value = 123;
+                  println(value);
+                }
+              output: |
+                true
+            - name: Integer
+              input: |
+                fun main() {
+                  let value = 123;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 123
-#             - name: Float
-#               input: |
-#                 fun main() {
-#                   let value = 1.0;
+                  println(value);
+                }
+              output: |
+                123
+            - name: Float
+              input: |
+                fun main() {
+                  let value = 1.0;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 1.000000
-#       - scenario:
-#           name: Constant Declaration Statement
-#           tests:
-#             - name: Boolean
-#               input: |
-#                 fun main() {
-#                   const value = true;
+                  println(value);
+                }
+              output: |
+                1.000000
+      - scenario:
+          name: Constant Declaration Statement
+          tests:
+            - name: Boolean
+              input: |
+                fun main() {
+                  const value = true;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 true
-#             - name: Integer
-#               input: |
-#                 fun main() {
-#                   const value = 123;
+                  println(value);
+                }
+              output: |
+                true
+            - name: Integer
+              input: |
+                fun main() {
+                  const value = 123;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 123
-#             - name: Float
-#               input: |
-#                 fun main() {
-#                   const value = 1.0;
+                  println(value);
+                }
+              output: |
+                123
+            - name: Float
+              input: |
+                fun main() {
+                  const value = 1.0;
 
-#                   println(value);
-#                 }
-#               output: |
-#                 1.000000
+                  println(value);
+                }
+              output: |
+                1.000000
 #       - scenario:
 #           name: If Statement
 #           tests:
