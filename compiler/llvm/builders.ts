@@ -110,6 +110,7 @@ export interface FunctionBuilder {
   or(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   phi(incoming: Array<[op: IR.Operand, label: string]>): IR.Operand;
   ret(op: IR.Operand): void;
+  retvoid(): void;
   sdiv(operand0: IR.Operand, operand1: IR.Operand): IR.Operand;
   store(
     target: IR.Operand,
@@ -357,6 +358,10 @@ const functionBuilder = (
 
   ret: function (c: IR.Constant) {
     this.instructions.push({ tag: "IRet", c });
+  },
+
+  retvoid: function () {
+    this.instructions.push({ tag: "IRetVoid" });
   },
 
   sdiv: function (operand0: IR.Operand, operand1: IR.Operand): IR.Operand {

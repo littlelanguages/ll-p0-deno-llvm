@@ -362,6 +362,7 @@ export type Instruction =
   | IOr
   | IPhi
   | IRet
+  | IRetVoid
   | ISDiv
   | IStore
   | ISub
@@ -507,6 +508,10 @@ export type IRet = {
   c: Constant;
 };
 
+export type IRetVoid = {
+  tag: "IRetVoid";
+};
+
 export type ISDiv = {
   tag: "ISDiv";
   result: string;
@@ -647,6 +652,8 @@ export const write = (
         }\n`
         : s.tag === "IRet"
         ? `  ret ${operandToString(s.c)}\n`
+        : s.tag === "IRetVoid"
+        ? `  ret void\n`
         : s.tag === "ISDiv"
         ? `  ${s.result} = sdiv ${operandToString(s.operand0)}, ${
           operandToUntypedString(s.operand1)

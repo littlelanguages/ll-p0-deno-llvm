@@ -77,6 +77,29 @@ const compileD = (
     const op = compileE(d.e, functionBuilder);
     functionBuilder.ret(op);
     functionBuilder.build();
+  } else if (d.tag === "FunctionDeclaration" && d.e === undefined) {
+    const ps: Array<[string, IR.Type]> = d.ps.map((p) => [p.n, toType(p.t)]);
+
+    const functionBuilder = declareFunction(
+      `@${d.n}`,
+      ps,
+      IR.voidType,
+      moduleBuilder,
+    );
+
+    ps.forEach((p, index) => {
+      const op = functionBuilder.alloca(p[1], undefined);
+      functionBuilder.store(
+        op,
+        undefined,
+        { tag: "LocalReference", type: p[1], name: `%${p[0]}` },
+      );
+      functionBuilder.registerOperand(p[0], op);
+    });
+
+    compileSS(d.ss, functionBuilder);
+    functionBuilder.retvoid();
+    functionBuilder.build();
   } else if (
     d.tag === "ConstantDeclaration" || d.tag === "VariableDeclaration"
   ) {

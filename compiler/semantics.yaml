@@ -669,48 +669,48 @@
                 }
               output: |
                 5050
-#       - scenario:
-#           name: Call Statement
-#           tests:
-#             - name: println
-#               input: |
-#                 fun main() {
-#                   println("hello");
-#                   println(true);
-#                   println(1);
-#                   println(2.0);
-#                 }
-#               output: |
-#                 hello
-#                 true
-#                 1
-#                 2.000000
-#             - name: print
-#               input: |
-#                 fun main() {
-#                   print("hello");
-#                   print(true);
-#                   print(1);
-#                   print(2.0);
-#                   println();
-#                 }
-#               output: |
-#                 hellotrue12.000000
-#             - name: toplevel unit function
-#               input: |
-#                 fun test(a: Bool, b: Int, c: Float) {
-#                   println("a: ", a);
-#                   println("b: ", b);
-#                   println("c: ", c);
-#                 }
+      - scenario:
+          name: Call Statement
+          tests:
+            - name: println
+              input: |
+                fun main() {
+                  println("hello");
+                  println(true);
+                  println(1);
+                  println(2.0);
+                }
+              output: |
+                hello
+                true
+                1
+                2.000000
+            - name: print
+              input: |
+                fun main() {
+                  print("hello");
+                  print(true);
+                  print(1);
+                  print(2.0);
+                  println();
+                }
+              output: |
+                hellotrue12.000000
+            - name: toplevel unit function
+              input: |
+                fun test(a: Bool, b: Int, c: Float) {
+                  println("a: ", a);
+                  println("b: ", b);
+                  println("c: ", c);
+                }
 
-#                 fun main() {
-#                   test(false, -120, -240.0);
-#                 }
-#               output: |
-#                 a: false
-#                 b: -120
-#                 c: -240.000000
+                fun main() {
+                  test(false, -120, -240.0);
+                }
+              output: |
+                a: false
+                b: -120
+                c: -240.000000
 # - scenario:
 #     name: Declarations
 #     tests:
