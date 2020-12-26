@@ -16,6 +16,7 @@ export type ErrorItem =
   | IncompatibleArgumentTypeError
   | LiteralFloatOverflowError
   | LiteralIntOverflowError
+  | LiteralStringError
   | MismatchInNumberOfParametersError
   | TernaryExpressionResultIncompatibleError
   | TernaryExpressionNotBooleanError
@@ -86,6 +87,12 @@ export type LiteralFloatOverflowError = {
 
 export type LiteralIntOverflowError = {
   tag: "LiteralIntOverflowError";
+  location: Location;
+  text: string;
+};
+
+export type LiteralStringError = {
+  tag: "LiteralStringError";
   location: Location;
   text: string;
 };

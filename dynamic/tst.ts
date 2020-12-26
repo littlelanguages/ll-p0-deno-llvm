@@ -92,7 +92,7 @@ export type BlockStatement = {
 export type CallStatement = {
   tag: "CallStatement";
   n: string;
-  args: Array<Expression>;
+  args: Array<Expression | LiteralString>;
 };
 
 export type EmptyStatement = {
@@ -143,8 +143,7 @@ export type IdentifierReference = {
 export type LiteralValue =
   | LiteralBool
   | LiteralInt
-  | LiteralFloat
-  | LiteralString;
+  | LiteralFloat;
 
 export type LiteralBool = {
   tag: "LiteralBool";

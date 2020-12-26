@@ -39,14 +39,16 @@ const runTestItem = (testItem: TestItem, index: number): Promise<void> => {
   return translate(testItem.input)
     .either(
       (e) => {
-        console.log(`>>>>>>>>>>>>>> ${JSON.stringify(e, null, 2)}`);
+        console.log(
+          `>>>>>>>>>>>>>> ${testItem.name}: ${JSON.stringify(e, null, 2)}`,
+        );
         return Promise.reject(e);
       },
       (tst) => {
         try {
           return Tools.write(compile(tst, testItem.name), `./tests/${name}.ll`);
         } catch (e) {
-          console.log(`>>>>>>>>>>>>>> ${e}`);
+          console.log(`>>>>>>>>>>>>>> ${testItem.name}: ${e}`);
           return Promise.reject(e);
         }
       },

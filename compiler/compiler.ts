@@ -130,9 +130,7 @@ const compileMain = (
 const compileSS = (
   ss: Array<TST.Statement>,
   functionBuilder: FunctionBuilder,
-) => {
-  ss.forEach((s) => compileS(s, functionBuilder));
-};
+) => ss.forEach((s) => compileS(s, functionBuilder));
 
 const compileS = (
   s: TST.Statement,
@@ -212,7 +210,7 @@ const compileS = (
     } else {
       functionBuilder.callvoid(
         `@${s.n}`,
-        s.args.map((e) => compileE(e, functionBuilder)),
+        s.args.map((e) => compileCallE(e, functionBuilder)),
       );
     }
   }
@@ -221,10 +219,10 @@ const compileS = (
 const compilePrintStatement = (
   s: TST.CallStatement,
   functionBuilder: FunctionBuilder,
-) => {
+) =>
   s.args.forEach((e) => {
     const et = typeOf(e);
-    const eo = compileE(e, functionBuilder);
+    const eo = compileCallE(e, functionBuilder);
     const name = et ===
         TST.Type.Bool
       ? "@_print_bool"
@@ -239,6 +237,44 @@ const compilePrintStatement = (
       [et === TST.Type.Bool ? functionBuilder.zext(IRType.i8, eo) : eo],
     );
   });
+
+const compileCallE = (
+  e: TST.Expression | TST.LiteralString,
+  functionBuilder: FunctionBuilder,
+): IROperand.Operand => {
+  if (e.tag === "LiteralString") {
+    const type = IRType.arrayType(e.v.length + 1, IRType.i8);
+
+    let op = functionBuilder.strings.get(e.v);
+    if (op === undefined) {
+      const name = `@_${functionBuilder.strings.size}.str`;
+
+      functionBuilder.declareGlobal(
+        name,
+        type,
+        true,
+        IROperand.carray(
+          IRType.i8,
+          [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((c) =>
+            IROperand.cint(8, c)
+          ),
+        ),
+      );
+      op = IROperand.cglobalReference(IRType.pointerType(type), name);
+
+      functionBuilder.strings.set(name, op);
+    }
+
+    return functionBuilder.getElementPointer(
+      true,
+      IRType.pointerType(IRType.i8),
+      type,
+      op,
+      [IROperand.cint(32, 0), IROperand.cint(32, 0)],
+    );
+  } else {
+    return compileE(e, functionBuilder);
+  }
 };
 
 const compileE = (
@@ -333,56 +369,22 @@ const compileE = (
       toType(e.t),
       e.args.map((e) => compileE(e, functionBuilder)),
     );
-  } else if (e.tag === "LiteralString") {
-    const type = IRType.arrayType(e.v.length + 1, IRType.i8);
-
-    let op = functionBuilder.strings.get(e.v);
-    if (op === undefined) {
-      const name = `@_${functionBuilder.strings.size}.str`;
-
-      functionBuilder.declareGlobal(
-        name,
-        type,
-        true,
-        IROperand.carray(
-          IRType.i8,
-          [...e.v.split("").map((c) => c.charCodeAt(0)), 0].map((c) =>
-            IROperand.cint(8, c)
-          ),
-        ),
-      );
-      op = IROperand.cglobalReference(IRType.pointerType(type), name);
-
-      functionBuilder.strings.set(name, op);
-    }
-
-    return functionBuilder.getElementPointer(
-      true,
-      IRType.pointerType(IRType.i8),
-      type,
-      op,
-      [IROperand.cint(32, 0), IROperand.cint(32, 0)],
-    );
   } else {
     return compileLV(e);
   }
 };
 
-const compileLV = (lv: TST.LiteralValue): IROperand.Constant =>
+const compileLV = (
+  lv: TST.LiteralInt | TST.LiteralBool | TST.LiteralFloat,
+): IROperand.Constant =>
   lv.tag === "LiteralInt"
     ? IROperand.cint(32, lv.v)
     : lv.tag === "LiteralBool"
     ? IROperand.cint(1, lv.v ? 1 : 0)
-    : lv.tag === "LiteralFloat"
-    ? IROperand.cfloatFP(lv.v)
-    : (() => {
-      throw new Error(
-        `Internal Error: lv: ${lv.tag}: ${JSON.stringify(lv, null, 2)}`,
-      );
-    })();
+    : IROperand.cfloatFP(lv.v);
 
 const typeOf = (
-  a: TST.LiteralValue | TST.Expression,
+  a: TST.LiteralValue | TST.LiteralString | TST.Expression,
 ): TST.Type => {
   if (a.tag === "LiteralBool") {
     return TST.Type.Bool;

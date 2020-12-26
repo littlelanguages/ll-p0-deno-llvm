@@ -57,17 +57,17 @@
             - name: true value
               input: |
                 fun main() {
-                  println(true ? "was true" : "was false");
+                  println(true ? 1 : 0);
                 }
               output: |
-                was true
+                1
             - name: false value
               input: |
                 fun main() {
-                  println(false ? "was true" : "was false");
+                  println(false ? 1 : 0);
                 }
               output: |
-                was false
+                0
       - scenario:
           name: Binary Expression
           tests:

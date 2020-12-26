@@ -5,6 +5,7 @@ import {
   BinaryOp,
   Declaration,
   Expression,
+  LiteralString,
   LiteralValue,
   Parameter,
   Program,
@@ -262,7 +263,13 @@ const p = (p: AST.Program): Either<Errors, Program> => {
           );
         }
         return { tag: "LiteralInt", v: v | 0 };
-      } else if (lv.tag === "LiteralFloat") {
+      }
+      if (lv.tag === "LiteralString") {
+        this.reportError(
+          { tag: "LiteralStringError", location: lv.location, text: lv.value },
+        );
+        return { tag: "LiteralBool", v: true };
+      } else {
         const v = parseFloat(lv.value);
 
         if (!isFinite(Math.fround(v))) {
@@ -275,11 +282,6 @@ const p = (p: AST.Program): Either<Errors, Program> => {
           );
         }
         return { tag: "LiteralFloat", v };
-      } else {
-        return {
-          tag: "LiteralString",
-          v: lv.value.substr(1, lv.value.length - 2),
-        };
       }
     },
 
@@ -430,7 +432,7 @@ const p = (p: AST.Program): Either<Errors, Program> => {
               {
                 tag: "CallStatement",
                 n: s.identifier.name,
-                args: s.expressions.map((e) => this.e(e, sigma)),
+                args: s.expressions.map((e) => this.calle(e, sigma)),
               },
               sigma,
             ];
@@ -472,7 +474,7 @@ const p = (p: AST.Program): Either<Errors, Program> => {
             sigma,
           ];
         } else if (binding.tag === "BFunction") {
-          const argsp = s.expressions.map((e) => this.e(e, sigma));
+          const argsp = s.expressions.map((e) => this.calle(e, sigma));
           if (argsp.length !== binding.ps.length) {
             this.reportError(
               {
@@ -535,6 +537,20 @@ const p = (p: AST.Program): Either<Errors, Program> => {
         ];
       } else {
         return [{ tag: "EmptyStatement" }, sigma];
+      }
+    },
+
+    calle: function (
+      e: AST.Expression | AST.LiteralString,
+      sigma: Bindings,
+    ): Expression | LiteralString {
+      if (e.tag === "LiteralString") {
+        return {
+          tag: "LiteralString",
+          v: e.value.substr(1, e.value.length - 2),
+        };
+      } else {
+        return this.e(e, sigma);
       }
     },
 
@@ -885,7 +901,7 @@ export const typeOfLiteralExpression = (le: AST.LiteralExpression): Type =>
     : Type.String;
 
 export const typeOf = (
-  a: LiteralValue | Expression,
+  a: LiteralValue | LiteralString | Expression,
 ): Type => {
   if (a.tag === "LiteralBool") {
     return Type.Bool;
