@@ -103,7 +103,7 @@ export const toUntypedString = (op: Operand): string =>
   op.tag === "CInt"
     ? `${op.value}`
     : op.tag === "CFloatFP"
-    ? floatToString(op.value)
+    ? `fptrunc (double ${floatToString(op.value)} to float)`
     : op.tag === "CArray"
     ? `[${op.values.map(toString).join(", ")}]`
     : op.tag === "CGlobalReference"
@@ -118,7 +118,8 @@ export const toString = (op: Operand): string =>
   op.tag === "CInt"
     ? `i${op.bits} ${op.value}`
     : op.tag === "CFloatFP"
-    ? `float ${floatToString(op.value)}`
+    ? `float fptrunc (double ${floatToString(op.value)} to float)`
+    // ? `float fptrunc (double ${floatToString(op.value)} to float)`
     : op.tag === "CArray"
     ? `[${op.values.map(toString).join(", ")}]`
     : op.tag === "CGlobalReference"
@@ -137,7 +138,7 @@ const floatToString = (v: number): string => {
   let result = ["0x"];
   buffer.forEach((b) => {
     const by = b.toString(16);
-    if (b < 17) {
+    if (b < 16) {
       result.push("0");
     }
     result.push(by);

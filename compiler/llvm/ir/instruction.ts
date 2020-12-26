@@ -45,6 +45,7 @@ export type Instruction =
   | IFCmp
   | IFDiv
   | IFMul
+  | IFPTrunc
   | IFSub
   | IGetElementPointer
   | IICmp
@@ -134,6 +135,13 @@ export type IFCmp = {
   op: FP;
   operand0: IROperand.Operand;
   operand1: IROperand.Operand;
+};
+
+export type IFPTrunc = {
+  tag: "IFPTrunc";
+  result: string;
+  type: IRType.Type;
+  operand: IROperand.Operand;
 };
 
 export type IFSub = {
@@ -276,6 +284,10 @@ export const toString = (i: Instruction): string =>
     : i.tag === "IFSub"
     ? `  ${i.result} = fsub ${IROperand.toString(i.operand0)}, ${
       IROperand.toUntypedString(i.operand1)
+    }\n`
+    : i.tag === "IFPTrunc"
+    ? `  ${i.result} = fptrunc ${IROperand.toString(i.operand)} to ${
+      IRType.toString(i.type)
     }\n`
     : i.tag === "IFMul"
     ? `  ${i.result} = fmul ${IROperand.toString(i.operand0)}, ${

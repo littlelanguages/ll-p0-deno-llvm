@@ -120,6 +120,7 @@ export interface FunctionBuilder {
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
   ): IROperand.Operand;
+  fptrunc(type: IRType.Type, operand: IROperand.Operand): IROperand.Operand;
   fsub(
     operand0: IROperand.Operand,
     operand1: IROperand.Operand,
@@ -294,6 +295,15 @@ const functionBuilder = (
     const result = this.newRegister();
     this.instructions.push({ tag: "IFMul", result, operand0, operand1 });
     return IROperand.localReference(IROperand.typeOf(operand0), result);
+  },
+
+  fptrunc: function (
+    type: IRType.Type,
+    operand: IROperand.Operand,
+  ): IROperand.Operand {
+    const result = this.newRegister();
+    this.instructions.push({ tag: "IFPTrunc", type, result, operand });
+    return IROperand.localReference(type, result);
   },
 
   fsub: function (
