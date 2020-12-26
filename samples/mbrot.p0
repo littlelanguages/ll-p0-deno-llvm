@@ -20,8 +20,6 @@ fun mandelconverge(real: Float, imag: Float): Int {
 }
 
 fun mandelhelp(xmin: Float, xmax: Float, xstep: Float, ymin: Float, ymax: Float, ystep: Float) {
-    println(xmin, " ", xmax, " ", xstep, " ", ymin, " ", ymax, " ", ystep);
-
     let y = ymin;
 
     while y < ymax {
