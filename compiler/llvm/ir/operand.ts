@@ -119,7 +119,6 @@ export const toString = (op: Operand): string =>
     ? `i${op.bits} ${op.value}`
     : op.tag === "CFloatFP"
     ? `float fptrunc (double ${floatToString(op.value)} to float)`
-    // ? `float fptrunc (double ${floatToString(op.value)} to float)`
     : op.tag === "CArray"
     ? `[${op.values.map(toString).join(", ")}]`
     : op.tag === "CGlobalReference"
