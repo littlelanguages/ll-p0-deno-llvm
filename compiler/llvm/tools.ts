@@ -25,7 +25,8 @@ export const compile = (
   targetFileName: string,
 ): Promise<IExecResponse> =>
   exec(
-    `clang-9 -c -emit-llvm ${sourceFileName} -o ${targetFileName}`,
+    // `clang-9 -c -emit-llvm ${sourceFileName} -o ${targetFileName}`,
+    `clang-9 -c ${sourceFileName} -o ${targetFileName}`,
     { output: OutputMode.Capture },
   );
 
@@ -46,3 +47,15 @@ export const run = (
     `lli-9 ${targetFileName} ${args.join(" ")}`,
     { output: OutputMode.Capture },
   );
+
+export const compileLink = (
+  targetFileName: string,
+  args: Array<string>,
+): Promise<IExecResponse> =>
+  exec(
+    `clang-9 ${args.join(" ")} -o ${targetFileName}`,
+    { output: OutputMode.Capture },
+  );
+
+export const runBinary = (target: string): Promise<IExecResponse> =>
+  exec(target, { output: OutputMode.Capture });

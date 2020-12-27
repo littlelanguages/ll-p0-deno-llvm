@@ -31,3 +31,7 @@ jobs:
         run: .bin/build.sh
       - name: Test ll-p0-deno-llvm
         run: .bin/test.sh
+      - name: mbrot
+        run: |
+          deno run --allow-all mod.ts samples/mbrot.p0
+          ./samples/mbrot 

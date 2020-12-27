@@ -5,3 +5,6 @@ llvm.sh
 samples/*.bc
 samples/*.o
 samples/*.ll
+samples/mbrot
+samples/primes
+samples/hello

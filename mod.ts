@@ -4,8 +4,8 @@ import * as Tools from "./compiler/llvm/tools.ts";
 import { IExecResponse } from "./deps/exec.ts";
 import { compile } from "./compiler/compiler.ts";
 
-if (Deno.args.length === 0) {
-  console.log("Error: no files specificed");
+if (Deno.args.length !== 1) {
+  console.log("Error: incorrect arguments");
 }
 
 const fileDateTime = (name: string): number => {
@@ -44,15 +44,15 @@ for (let f of Deno.args) {
   const sourcename = formatExtension(base, ".p0");
   const targetname = Path.format(base);
 
-  console.log(
-    `${sourcename}: ${fileDateTime(sourcename)}  ${targetname}: ${
-      fileDateTime(targetname)
-    }`,
-  );
+  // console.log(
+  //   `${sourcename}: ${fileDateTime(sourcename)}  ${targetname}: ${
+  //     fileDateTime(targetname)
+  //   }`,
+  // );
 
   const targetnameDateTime = fileDateTime(targetname);
   if (
-    targetnameDateTime === 0 || fileDateTime(sourcename) < targetnameDateTime
+    fileDateTime(sourcename) > targetnameDateTime
   ) {
     console.log(`Compiling ${sourcename}`);
     await Deno.readTextFile(sourcename)
@@ -77,20 +77,14 @@ for (let f of Deno.args) {
           )
           .then(() =>
             run(
-              Tools.assemble(
-                formatExtension(base, ".ll"),
-                formatExtension(base, ".o"),
+              Tools.compileLink(
+                Path.format(base),
+                [formatExtension(base, ".ll"), "./p0lib.c"],
               ),
             )
           )
-          .then(() =>
-            run(
-              Tools.link(
-                [formatExtension(base, ".o"), "./tests/p0lib.o"],
-                formatExtension(base, ".bc"),
-              ),
-            )
-          ).catch((e) => console.log(e))
+          .then(() => Deno.remove(formatExtension(base, ".ll")))
+          .catch((e) => console.log(e))
       );
   }
 }
