@@ -69,7 +69,8 @@ const runTestItem = (testItem: TestItem, index: number): Promise<void> => {
 };
 
 const runTests = (): Promise<any> =>
-  run(Tools.compile("-emit-llvm ./p0lib.c", "./tests/p0lib.o"))
+  Deno.mkdir("./tests", { recursive: true })
+    .then(() => run(Tools.compile("-emit-llvm ./p0lib.c", "./tests/p0lib.o")))
     .then(() => readYaml("./compiler/semantics.yaml"))
     .then((content) =>
       Promise.all(
